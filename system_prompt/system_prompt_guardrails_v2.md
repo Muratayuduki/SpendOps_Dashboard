@@ -42,7 +42,10 @@
 
 ### 3.1 プロジェクト概要
 
-SpendOps Dashboardは、PayPay・横浜銀行・JCBカードの取引通知メールを専用Gmailで受信し、GASで30分ごとに解析してCSV化し、AWSへ送信するWebアプリです。
+SpendOps Dashboardは、日常支出とAWS利用料金をまとめて可視化し、月別の支出傾向を分析するWebアプリです。
+
+PayPayは現段階でGmailから支出情報や店舗名を安定取得できないため、CSVアップロード時に反映します。
+横浜銀行とJCBカードは、取引通知メールを専用Gmailで受信し、GASで30分ごとに解析してCSV化し、AWSへ送信します。
 
 AWS側では、API Gateway、Lambda、S3、DynamoDB、Cognitoを使って、取引データを保存・集計・表示します。
 
@@ -57,7 +60,8 @@ AWS側では、API Gateway、Lambda、S3、DynamoDB、Cognitoを使って、取�
 | 認証 | Cognito、メールアドレス・パスワード |
 | DB | DynamoDB |
 | CSV保存 | S3 |
-| メール取得 | Gmail + GAS |
+| PayPay取得 | CSVアップロード |
+| メール取得 | Gmail + GAS。対象は横浜銀行、JCBカード |
 | 定期実行 | GASを30分ごと |
 | IaC | Terraform。ただし提出後の追加開発 |
 | 発表資料 | PowerPoint、16枚程度 |
@@ -98,16 +102,20 @@ AWS側では、API Gateway、Lambda、S3、DynamoDB、Cognitoを使って、取�
 ### 4.4 SpendOps Dashboard固有の必須条件
 
 - 対象サービスはPayPay、横浜銀行、JCBカードから始める
-- GASは30分ごとに未処理メールをまとめて処理する
-- AWSへはCSV形式で送信する
+- PayPayはCSVアップロードで取り込む
+- 横浜銀行とJCBカードはGmail + GASで取得する
+- GASは30分ごとに横浜銀行とJCBカードの未処理メールをまとめて処理する
+- AWSへはCSV形式を基本として送信する
 - CSVはS3に保存する
 - DynamoDBにはmessageIdを保存して重複登録を防ぐ
+- PayPay CSV由来データは取引ハッシュとimportBatchIdで重複登録を防ぐ
 - 返金・取消はcancelとして扱い、元取引に紐づける
 - 横浜銀行は支出ではなく入出金履歴として別枠で扱う
 - カテゴリは食費、交通費、日用品、雑費から始める
 - 月別レポート画面を最優先にする
 - カテゴリ別円グラフを表示する
 - 円グラフの項目から明細一覧ページに遷移できるようにする
+- PayPay最終取込日と未取込警告を表示する
 - API Gatewayへの送信は秘密トークン方式で保護する
 - Terraformは提出後の追加開発扱いにする
 
@@ -217,7 +225,11 @@ AWS側では、API Gateway、Lambda、S3、DynamoDB、Cognitoを使って、取�
 ```text
 あなたは、SpendOps Dashboardの実装担当エージェントです。
 
-SpendOps Dashboardは、PayPay・横浜銀行・JCBカードの取引通知メールを専用Gmailで受け取り、GASで30分ごとに未処理メールを取得し、複数行CSVとしてAWSへ送信し、AWS側で保存・集計・月別レポート表示を行うNext.js製Webアプリです。
+SpendOps Dashboardは、日常支出とAWS利用料金をまとめて可視化し、月別レポート表示を行うNext.js製Webアプリです。
+
+PayPayはCSVアップロードで取り込みます。
+横浜銀行とJCBカードは、取引通知メールを専用Gmailで受け取り、GASで30分ごとに未処理メールを取得し、複数行CSVとしてAWSへ送信します。
+AWS側では保存・集計・月別レポート表示を行います。
 
 目的:
 - 学校課題として9月7日までに提出できる完成度にする
@@ -232,7 +244,8 @@ SpendOps Dashboardは、PayPay・横浜銀行・JCBカードの取引通知メ�
 - 認証: Cognito、メールアドレス・パスワードログイン
 - DB: DynamoDB
 - CSV保存: S3
-- メール取得: Gmail + GAS
+- PayPay取得: CSVアップロード
+- メール取得: Gmail + GAS。対象は横浜銀行、JCBカード
 - 定期実行: GASを30分ごとに実行
 - IaC: Terraform。ただし9月7日以降の追加開発扱い
 
@@ -240,9 +253,12 @@ SpendOps Dashboardは、PayPay・横浜銀行・JCBカードの取引通知メ�
 - 月別レポート画面を最優先で作成する
 - 月別レポートには、総支出、前月比、1日平均支出、カテゴリ別円グラフを表示する
 - カテゴリ別円グラフの項目から、カテゴリ別明細一覧ページへ遷移できるようにする
-- GASは未処理メールを30分ごとにまとめてCSV化し、API Gatewayへ送信する
+- PayPay CSVアップロード画面、CSVプレビュー、取込結果表示を作成する
+- PayPay最終取込日と未取込警告を表示する
+- GASは横浜銀行とJCBカードの未処理メールを30分ごとにまとめてCSV化し、API Gatewayへ送信する
 - LambdaはCSVを受信し、秘密トークンを検証し、CSVをS3に保存し、DynamoDBへ保存する
-- DynamoDBにはmessageIdを保存し、重複登録を防ぐ
+- DynamoDBにはGmail由来データのmessageIdを保存し、重複登録を防ぐ
+- PayPay CSV由来データは取引ハッシュとimportBatchIdで重複登録を防ぐ
 - 返金や取消はcancelとして扱い、元取引に紐づける
 - 横浜銀行は支出ではなく入出金履歴として別枠で扱う
 - カテゴリは食費、交通費、日用品、雑費から始める
@@ -256,8 +272,10 @@ SpendOps Dashboardは、PayPay・横浜銀行・JCBカードの取引通知メ�
 
 完了条件:
 - アプリとして運用できる
-- PayPay、横浜銀行、JCBの取引データを表示できる
+- PayPay CSVをアップロードし、取引データを表示できる
+- 横浜銀行、JCBの取引データをGmail + GAS経由で表示できる
 - 月別レポートを取得できる
+- PayPay最終取込日と未取込警告を表示できる
 - Webアプリとして見た目が整っている
 - GitHubリポジトリで説明できる
 - PowerPoint資料で仕組みを説明できる
