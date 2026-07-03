@@ -1,14 +1,16 @@
 # Codex Instructions
 
-このリポジトリで作業するCodexは、ユーザーから個別に指示がなくても、作業開始前に必ず次の2ファイルを読むこと。
+このリポジトリで作業するCodexは、ユーザーから個別に指示がなくても、作業開始前に必ず次の3ファイルを読むこと。
 
 1. `README.md`
-2. `system_prompt/system_prompt_guardrails_v2.md`
+2. `docs/system_prompt_guardrails_v2.md`
+3. `docs/codex_handoff.md`
 
 ## 作業開始時のルール
 
-- `README.md` で最新仕様、進捗、Notion更新履歴、未決事項を確認する
-- `system_prompt/system_prompt_guardrails_v2.md` でガードレール、禁止事項、出力方針を確認する
+- `README.md` でプロジェクト概要、最新仕様、主要機能、完了条件を確認する
+- `docs/system_prompt_guardrails_v2.md` でガードレール、禁止事項、出力方針を確認する
+- `docs/codex_handoff.md` で進捗、Notion更新履歴、次回作業、未決事項を確認する
 - 既存資料、既存コード、既存draw.ioを確認してから変更する
 - 不明点が成果物の品質に大きく影響する場合は、推測せず質問する
 - 軽微な不明点は、仮定を明示して前に進める
