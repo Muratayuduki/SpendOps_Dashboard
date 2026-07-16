@@ -4163,3 +4163,56 @@ svg {
     transform: none;
   }
 }
+
+/* Compact case-study layout: keep the original visual language while reducing reading time. */
+[hidden] {
+  display: none !important;
+}
+
+.story.section,
+.experience.section,
+.architecture.section {
+  padding-block: 108px;
+}
+
+.story .fragment-grid {
+  margin-top: 56px;
+}
+
+.story .fragment-card {
+  min-height: 220px;
+}
+
+.experience .product-demo {
+  margin-top: 58px;
+}
+
+.experience .feature-notes {
+  margin-top: 50px;
+}
+
+.architecture .architecture-map {
+  margin-top: 64px;
+}
+
+.site-footer .shell {
+  min-height: 110px;
+}
+
+@media (max-width: 760px) {
+  .story.section,
+  .experience.section,
+  .architecture.section {
+    padding-block: 76px;
+  }
+
+  .story .fragment-grid,
+  .experience .product-demo,
+  .architecture .architecture-map {
+    margin-top: 42px;
+  }
+
+  .story .fragment-card {
+    min-height: 190px;
+  }
+}

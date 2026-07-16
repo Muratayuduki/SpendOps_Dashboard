@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="SpendOps Dashboard — 散らばる決済データをひとつに集約し、月ごとの傾向と次の一手を可視化する支出分析ダッシュボード。"
+      content="SpendOps Dashboard — 形式の異なる支出CSVを正規化し、自分の月次支出を匿名化された全体平均と比較できる分析サービス。"
     />
     <meta name="theme-color" content="#f4f1ea" />
     <title>SpendOps Dashboard — Portfolio Case Study</title>
@@ -23,14 +23,13 @@
       </a>
 
       <nav class="global-nav" id="primary-navigation" aria-label="メインナビゲーション" data-nav>
-        <a href="#story">Story</a>
-        <a href="#experience">Experience</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#process">Process</a>
+        <a href="#story">3つの工夫</a>
+        <a href="#experience">画面</a>
+        <a href="#architecture">仕組み</a>
       </nav>
 
       <a class="header-cta" href="#experience">
-        <span>Explore project</span>
+        <span>画面を見る</span>
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <path d="M4 10h11M11 5l5 5-5 5" />
         </svg>
@@ -51,31 +50,30 @@
           <div class="hero-copy">
             <div class="eyebrow hero-enter" style="--delay: 0ms">
               <span class="status-dot"></span>
-              PERSONAL FINOPS / CASE STUDY 2026
+              MULTI-USER CSV ANALYTICS / CASE STUDY 2026
             </div>
 
             <h1 id="hero-title" class="hero-title hero-enter" style="--delay: 80ms">
-              支出を、<br />
-              <span class="title-accent">意思決定</span>に。
+              比べる。<br />
+              <span class="title-accent">でも、匿名。</span>
             </h1>
 
             <p class="hero-lead hero-enter" style="--delay: 160ms">
-              PayPayとJCBの支出、横浜銀行の入出金をひとつのサービスに。
-              支出と口座の動きを分けて整理し、月ごとの変化と次に見直すべきポイントを可視化する
-              サーバーレス分析ダッシュボード。
+              PayPay・JCB・VISAのCSVを共通形式へ変換。
+              自分の月次支出を、匿名化された全体平均と安全に比較できる分析サービスです。
             </p>
 
             <p class="prototype-note hero-enter" style="--delay: 200ms">
-              <span>PROTOTYPE</span> 画面内の数値はUI検証用サンプルです。MVPは現在、実装準備中です。
+              <span>PROTOTYPE</span> 要件・AWS構成・UIを設計済み。画面内の数値は検証用サンプルです。
             </p>
 
             <div class="hero-actions hero-enter" style="--delay: 240ms">
               <a class="button button-dark" href="#experience">
-                UIプロトタイプを見る
+                画面を30秒で見る
                 <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" /></svg>
               </a>
               <a class="text-link" href="#architecture">
-                <span>仕組みを見る</span>
+                <span>設計の工夫を見る</span>
                 <span class="text-link-arrow" aria-hidden="true">↘</span>
               </a>
             </div>
@@ -83,11 +81,11 @@
             <dl class="hero-meta hero-enter" style="--delay: 320ms">
               <div>
                 <dt>ROLE</dt>
-                <dd>Solo / Planning / UX &amp; UI</dd>
+                <dd>Solo / Planning / UX / AWS Design</dd>
               </div>
               <div>
                 <dt>STATUS</dt>
-                <dd><span class="mini-status"></span> Design &amp; Prototype</dd>
+                <dd><span class="mini-status"></span> Prototype / Build next</dd>
               </div>
             </dl>
           </div>
@@ -118,7 +116,7 @@
                   <div class="dash-heading">
                     <div>
                       <span class="dash-kicker">MONTHLY REPORT</span>
-                      <h2>6月の支出</h2>
+                      <h2>6月の比較レポート</h2>
                     </div>
                     <button type="button" tabindex="-1" aria-hidden="true">2026 / 06 <span>⌄</span></button>
                   </div>
@@ -127,17 +125,17 @@
                     <div class="dash-stat dash-stat-primary">
                       <span>Total spending</span>
                       <strong>¥184,620</strong>
-                      <small><b>−12.4%</b> from last month / 銀行は別集計</small>
+                      <small><b>−6.5%</b> vs. anonymous average</small>
                     </div>
                     <div class="dash-stat">
-                      <span>Daily average</span>
-                      <strong>¥6,154</strong>
-                      <small>30 days</small>
+                      <span>Group average</span>
+                      <strong>¥197,400</strong>
+                      <small>anonymous aggregate</small>
                     </div>
                     <div class="dash-stat">
                       <span>Imported</span>
-                      <strong>68</strong>
-                      <small>transactions</small>
+                      <strong>03</strong>
+                      <small>CSV sources</small>
                     </div>
                   </div>
 
@@ -160,25 +158,24 @@
                     </div>
 
                     <div class="rhythm-panel">
-                      <div class="panel-title"><span>Weekly rhythm</span><small>JUN 01—30</small></div>
-                      <div class="mini-bars" aria-label="週ごとの支出推移">
-                        <i style="--h: 40%"></i><i style="--h: 62%"></i><i style="--h: 48%"></i>
-                        <i class="bar-focus" style="--h: 88%"></i><i style="--h: 58%"></i>
-                        <i style="--h: 70%"></i><i style="--h: 52%"></i>
+                      <div class="panel-title"><span>You vs. average</span><small>JUN 2026</small></div>
+                      <div class="mini-bars" aria-label="カテゴリ別の平均との差">
+                        <i style="--h: 52%"></i><i style="--h: 68%"></i>
+                        <i class="bar-focus" style="--h: 88%"></i><i style="--h: 61%"></i>
                       </div>
-                      <div class="bar-labels"><span>W1</span><span>W2</span><span>W3</span><span>W4</span></div>
+                      <div class="bar-labels"><span>食費</span><span>日用</span><span>交通</span><span>娯楽</span></div>
                     </div>
                   </div>
 
                   <div class="dash-bottom-row">
                     <div class="sync-card sync-card-warning">
                       <span class="sync-icon" aria-hidden="true">↻</span>
-                      <span><small>PAYPAY CSV</small><b>最終取込 6月29日・2日未取込</b></span>
+                      <span><small>CSV STATUS</small><b>3種類を正規化・68件を集計</b></span>
                       <i></i>
                     </div>
                     <div class="insight-card">
                       <span class="insight-mark" aria-hidden="true">✦</span>
-                      <p><small>SPENDOPS INSIGHT</small>外食費が先月より18%減少しています。</p>
+                      <p><small>SPENDOPS INSIGHT</small>食費は全体平均より8%低い傾向です。</p>
                       <span aria-hidden="true">→</span>
                     </div>
                   </div>
@@ -187,79 +184,78 @@
             </article>
 
             <div class="floating-card floating-card-source">
-              <span class="source-icon source-pay">P</span>
-              <span><small>PAYPAY CSV</small><strong>32件を取込済み</strong></span>
+              <span class="source-icon source-pay">3</span>
+              <span><small>CSV FORMATS</small><strong>共通形式へ正規化</strong></span>
               <i></i>
             </div>
 
             <div class="floating-card floating-card-change">
               <span class="change-arrow">↘</span>
-              <span><small>VS. LAST MONTH</small><strong>12.4% less</strong></span>
+              <span><small>VS. GROUP AVG.</small><strong>6.5% lower</strong></span>
             </div>
           </div>
         </div>
 
         <div class="shell hero-foot">
-          <span>SCROLL TO DISCOVER</span>
+          <span>1 MINUTE CASE STUDY</span>
           <span class="scroll-line" aria-hidden="true"><i></i></span>
-          <span>01 — 07</span>
+          <span>01 — 03</span>
         </div>
       </section>
 
       <div class="signal-strip" aria-label="SpendOpsの主要テーマ">
         <div class="signal-track">
-          <span>MONTHLY CLARITY</span><i>✦</i><span>SMART IMPORT</span><i>✦</i>
-          <span>SERVERLESS DESIGN</span><i>✦</i><span>PRIVACY FIRST</span><i>✦</i>
-          <span aria-hidden="true">MONTHLY CLARITY</span><i aria-hidden="true">✦</i>
-          <span aria-hidden="true">SMART IMPORT</span><i aria-hidden="true">✦</i>
-          <span aria-hidden="true">SERVERLESS DESIGN</span><i aria-hidden="true">✦</i>
-          <span aria-hidden="true">PRIVACY FIRST</span><i aria-hidden="true">✦</i>
+          <span>CSV NORMALIZATION</span><i>✦</i><span>ANONYMOUS COMPARISON</span><i>✦</i>
+          <span>PARTIAL IMPORT</span><i>✦</i><span>PRIVACY BY DESIGN</span><i>✦</i>
+          <span aria-hidden="true">CSV NORMALIZATION</span><i aria-hidden="true">✦</i>
+          <span aria-hidden="true">ANONYMOUS COMPARISON</span><i aria-hidden="true">✦</i>
+          <span aria-hidden="true">PARTIAL IMPORT</span><i aria-hidden="true">✦</i>
+          <span aria-hidden="true">PRIVACY BY DESIGN</span><i aria-hidden="true">✦</i>
         </div>
       </div>
 
       <section class="story section" id="story" aria-labelledby="story-title">
         <div class="shell">
-          <div class="section-label reveal"><span>01</span> / THE STORY</div>
+          <div class="section-label reveal"><span>01</span> / THREE DESIGN POINTS</div>
           <div class="story-heading-grid">
             <h2 id="story-title" class="display-title reveal">
-              お金の流れは、<br />
-              <span>ひとつの場所では見えない。</span>
+              工夫したのは、<br />
+              <span>この3点です。</span>
             </h2>
             <div class="story-intro reveal">
               <p>
-                決済アプリ、カード、銀行。それぞれに履歴はあるのに、
-                月全体を振り返ろうとすると、数字はばらばらなままです。
+                形式の違うCSVを揃え、他人の明細を見せず、
+                一部の行に問題があっても分析を止めない設計にしました。
               </p>
               <p>
-                SpendOpsは「記録すること」ではなく、
-                <strong>振り返りから次の選択をつくること</strong>を目的に設計しました。
+                機能数ではなく、<strong>比較に使えるデータの品質と安心感</strong>を優先しています。
               </p>
             </div>
           </div>
 
           <div class="fragment-grid">
             <article class="fragment-card fragment-paypay reveal">
-              <div class="fragment-top"><span class="source-icon source-pay">P</span><span>PAYPAY</span><small>CSV</small></div>
+              <div class="fragment-top"><span class="source-icon source-pay">01</span><span>NORMALIZE</span><small>CSV</small></div>
               <div class="receipt-lines" aria-hidden="true"><i></i><i></i><i></i></div>
-              <div class="fragment-amount"><small>JUN 28 / FOOD</small><strong>− ¥1,280</strong></div>
+              <div class="fragment-amount"><small>UTF-8 / SHIFT_JIS / HEADER GAP</small><strong>3形式を共通化</strong></div>
             </article>
 
             <article class="fragment-card fragment-jcb reveal">
-              <div class="fragment-top"><span class="source-icon source-card">J</span><span>JCB CARD</span><small>GMAIL</small></div>
+              <div class="fragment-top"><span class="source-icon source-card">02</span><span>ANONYMIZE</span><small>PRIVACY</small></div>
               <div class="receipt-lines" aria-hidden="true"><i></i><i></i></div>
-              <div class="fragment-amount"><small>JUN 26 / DAILY</small><strong>− ¥6,840</strong></div>
+              <div class="fragment-amount"><small>NO RAW CSV / NO OTHER DETAILS</small><strong>集計値だけ比較</strong></div>
             </article>
 
             <article class="fragment-card fragment-bank reveal">
-              <div class="fragment-top"><span class="source-icon source-bank">Y</span><span>YOKOHAMA BANK</span><small>GMAIL</small></div>
+              <div class="fragment-top"><span class="source-icon source-bank">03</span><span>KEEP GOING</span><small>ROBUST</small></div>
               <div class="receipt-lines" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-              <div class="fragment-amount"><small>JUN 24 / TRANSFER</small><strong>± ¥24,000</strong></div>
+              <div class="fragment-amount"><small>ROW-LEVEL ERROR FEEDBACK</small><strong>部分取込に対応</strong></div>
             </article>
 
             <div class="fragment-result reveal">
               <span class="result-arrow" aria-hidden="true">↘</span>
-              <p>Three sources.<br /><strong>One clear home.</strong></p>
-              <div class="result-number"><span>06</span><small>/ 2026</small></div>
+              <p>Your spending.<br /><strong>Compared safely.</strong></p>
+              <div class="result-number"><span>−6.5</span><small>% VS. AVG.</small></div>
             </div>
           </div>
         </div>
@@ -267,23 +263,23 @@
 
       <section class="experience section" id="experience" aria-labelledby="experience-title">
         <div class="shell">
-          <div class="section-label reveal"><span>02</span> / PRODUCT EXPERIENCE</div>
+          <div class="section-label reveal"><span>02</span> / UI PROTOTYPE</div>
           <div class="experience-heading">
-            <h2 id="experience-title" class="display-title reveal">数字を眺めて終わらない。<br /><span>気づきまで、ひとつの画面で。</span></h2>
-            <p class="reveal">月別レポート・CSV取込・改善インサイト。<br />3つの主要画面をUIプロトタイプで切り替えられます。</p>
+            <h2 id="experience-title" class="display-title reveal">自分と平均を、<br /><span>迷わず比べられる画面。</span></h2>
+            <p class="reveal">比較レポート・安全なCSV取込・傾向の読み取り。<br />主要体験だけをプロトタイプにしました。</p>
           </div>
 
           <div class="product-demo reveal" data-product-demo>
             <div class="demo-toolbar">
               <div class="demo-tabs" role="tablist" aria-label="画面サンプルの切り替え">
                 <button type="button" role="tab" aria-selected="true" aria-controls="panel-report" id="tab-report" data-demo-tab="report">
-                  <span>01</span> Monthly report
+                  <span>01</span> Compare
                 </button>
                 <button type="button" role="tab" aria-selected="false" aria-controls="panel-import" id="tab-import" tabindex="-1" data-demo-tab="import">
-                  <span>02</span> Smart import
+                  <span>02</span> Import
                 </button>
                 <button type="button" role="tab" aria-selected="false" aria-controls="panel-insight" id="tab-insight" tabindex="-1" data-demo-tab="insight">
-                  <span>03</span> Insights
+                  <span>03</span> Signals
                 </button>
               </div>
               <span class="prototype-label"><i></i> INTERACTIVE PROTOTYPE</span>
@@ -302,19 +298,19 @@
               <div class="demo-screen">
                 <section class="demo-panel is-active" id="panel-report" role="tabpanel" aria-labelledby="tab-report" data-demo-panel="report">
                   <div class="screen-header">
-                    <div><span>OVERVIEW / JUNE</span><h3>おかえりなさい。</h3></div>
-                    <div class="screen-actions"><span class="import-warning"><i></i>PayPay 2日未取込</span><button type="button" tabindex="-1" aria-hidden="true">2026年6月⌄</button><span class="bell">•</span></div>
+                    <div><span>COMPARE / JUNE</span><h3>6月の比較レポート</h3></div>
+                    <div class="screen-actions"><span class="import-warning"><i></i>3ソース取込済み</span><button type="button" tabindex="-1" aria-hidden="true">2026年6月⌄</button><span class="bell">•</span></div>
                   </div>
                   <div class="report-grid">
                     <article class="report-total">
-                      <div><span>今月の総支出</span><small class="trend-down">↘ 12.4%</small></div>
+                      <div><span>あなたの総支出</span><small class="trend-down">平均より −6.5%</small></div>
                       <strong>¥184,620</strong>
                       <div class="sparkline" aria-label="月内の支出推移"><svg viewBox="0 0 320 80" preserveAspectRatio="none"><path class="spark-fill" d="M0 68 C30 60 35 26 70 42 S120 58 145 28 S195 8 220 38 S275 53 320 12 L320 80 L0 80 Z"/><path class="spark-line" d="M0 68 C30 60 35 26 70 42 S120 58 145 28 S195 8 220 38 S275 53 320 12"/></svg></div>
                       <div class="spark-labels"><span>6/1</span><span>6/8</span><span>6/15</span><span>6/22</span><span>6/30</span></div>
-                      <small class="report-scope-note">※ 銀行の入出金は総支出に含みません</small>
+                      <small class="report-scope-note">匿名化された全体平均：¥197,400</small>
                     </article>
-                    <article class="report-mini"><span>1日平均</span><strong>¥6,154</strong><small>月間予算内</small></article>
-                    <article class="report-mini"><span>取引件数</span><strong>68<em>件</em></strong><small>2つの支出元</small></article>
+                    <article class="report-mini"><span>全体平均</span><strong>¥197,400</strong><small>匿名集計</small></article>
+                    <article class="report-mini"><span>取引件数</span><strong>68<em>件</em></strong><small>3つのCSV</small></article>
                     <article class="report-categories">
                       <div class="card-heading"><span>カテゴリ別</span><button type="button" tabindex="-1" aria-hidden="true">詳細を見る ↗</button></div>
                       <div class="category-list">
@@ -326,14 +322,14 @@
                     </article>
                     <article class="report-insight">
                       <span class="insight-mark">✦</span>
-                      <div><small>THIS MONTH'S SIGNAL</small><p>週末の外食費が<strong>先月比18%減少</strong>。月間予算内で着地しました。</p></div>
+                      <div><small>THIS MONTH'S SIGNAL</small><p>食費は全体平均より<strong>8%低い</strong>一方、交通費は12%高い傾向です。</p></div>
                     </article>
                   </div>
                 </section>
 
                 <section class="demo-panel" id="panel-import" role="tabpanel" aria-labelledby="tab-import" data-demo-panel="import" hidden>
                   <div class="screen-header">
-                    <div><span>DATA / IMPORT</span><h3>PayPay CSVを取り込む</h3></div>
+                    <div><span>DATA / IMPORT</span><h3>支出CSVを取り込む</h3></div>
                     <span class="import-history-link">取込履歴 12件 ↗</span>
                   </div>
                   <div class="import-layout">
@@ -342,12 +338,12 @@
                       <h4>ファイルをドロップ</h4>
                       <p>または、ファイルを選択してください</p>
                       <button type="button" tabindex="-1" aria-hidden="true">CSVを選択</button>
-                      <small>PAYPAY TRANSACTION CSV</small>
+                      <small>PAYPAY / JCB / VISA CSV</small>
                     </div>
                     <div class="import-guide">
                       <span>BEFORE YOU IMPORT</span>
                       <h4>取り込む前に、<br />内容を確認できます。</h4>
-                      <ul><li><i>✓</i> 日付・金額・店舗名をプレビュー</li><li><i>✓</i> 重複候補を自動検出</li><li><i>✓</i> エラー行だけを切り分け</li></ul>
+                      <ul><li><i>✓</i> 文字コードと形式を自動判定</li><li><i>✓</i> 日付・金額・店舗名を共通化</li><li><i>✓</i> エラー行以外はそのまま集計</li></ul>
                     </div>
                     <div class="import-status-row">
                       <article><span class="status-symbol success">✓</span><span><small>SUCCESS</small><strong>32</strong></span><em>取込成功</em></article>
@@ -359,21 +355,21 @@
 
                 <section class="demo-panel" id="panel-insight" role="tabpanel" aria-labelledby="tab-insight" data-demo-panel="insight" hidden>
                   <div class="screen-header">
-                    <div><span>ANALYSIS / SIGNALS</span><h3>今月の気づき</h3></div>
+                    <div><span>ANALYSIS / SIGNALS</span><h3>平均との違い</h3></div>
                     <span class="analysis-period">JUN 01 — 30</span>
                   </div>
                   <div class="insights-layout">
                     <article class="insight-hero-card">
-                      <div class="insight-orb"><span>−18%</span><small>DINING OUT</small></div>
-                      <div><span>GOOD SIGNAL</span><h4>外食費が、<br />いいペースです。</h4><p>先月の同じ時点と比べて、外食費が¥8,420減少しています。</p></div>
+                      <div class="insight-orb"><span>−8%</span><small>VS. AVG.</small></div>
+                      <div><span>YOUR STRENGTH</span><h4>食費は、<br />平均より低めです。</h4><p>個人の明細を公開せず、匿名化した集計値だけで傾向を比較します。</p></div>
                     </article>
                     <article class="insight-action-card">
-                      <span>NEXT ACTION</span><h4>次月は週2回の自炊で、<br />月間目標へ。</h4><div class="goal-meter"><i></i></div><div><small>6月 ¥77,540</small><small>7月目標 ¥72,000</small></div>
+                      <span>CHECK NEXT</span><h4>交通費は平均より12%高め。<br />利用内訳を確認。</h4><div class="goal-meter"><i></i></div><div><small>あなた ¥33,230</small><small>平均 ¥29,670</small></div>
                     </article>
                     <article class="insight-pattern-card">
                       <div class="card-heading"><span>支出のリズム</span><small>WEEKLY</small></div>
                       <div class="pattern-days"><i style="--v:.4"><small>M</small></i><i style="--v:.56"><small>T</small></i><i style="--v:.35"><small>W</small></i><i style="--v:.65"><small>T</small></i><i style="--v:.82"><small>F</small></i><i class="peak" style="--v:1"><small>S</small></i><i style="--v:.7"><small>S</small></i></div>
-                      <p>土曜日の支出が平均より<strong>24%高い</strong>傾向です。</p>
+                      <p>土曜日の支出が全体平均より<strong>14%高い</strong>傾向です。</p>
                     </article>
                   </div>
                 </section>
@@ -382,38 +378,9 @@
           </div>
 
           <div class="feature-notes">
-            <article class="reveal"><span>01</span><h3>月を、ひと目で。</h3><p>総支出・前月比・1日平均・カテゴリ構成を、迷わず読める優先順位で設計。</p></article>
-            <article class="reveal"><span>02</span><h3>安心して、取り込める。</h3><p>プレビュー、重複検出、エラー件数まで見せて「入ったか分からない」をなくします。</p></article>
-            <article class="reveal"><span>03</span><h3>数字を、行動へ。</h3><p>変化を説明するだけでなく、次に試せる小さなアクションまで提示します。</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="decision section" aria-labelledby="decision-title">
-        <div class="shell decision-grid">
-          <div>
-            <div class="section-label reveal"><span>03</span> / DESIGN DECISION</div>
-            <h2 id="decision-title" class="display-title reveal">完全自動より、<br /><span>正確な準自動。</span></h2>
-          </div>
-          <div class="decision-copy reveal">
-            <p class="decision-lead">“できること”ではなく、<br />“信頼できること”から設計する。</p>
-            <p>PayPayはメールから店舗名や支出情報を安定して取得できない。そこで不確実な自動解析を追わず、CSV取込へ切り替えました。</p>
-            <p>代わりに、最終取込日・未取込警告・重複検出を丁寧に設計。自動化率ではなく、日常で安心して使える確実性を選びました。</p>
-          </div>
-        </div>
-        <div class="shell tradeoff-visual reveal">
-          <div class="tradeoff-old">
-            <span>ORIGINAL IDEA</span>
-            <h3>Everything automatic</h3>
-            <div class="old-flow"><i>PayPay</i><b>→</b><i>Gmail</i><b>→</b><i class="uncertain">?</i></div>
-            <small>不安定なメール解析</small>
-          </div>
-          <div class="tradeoff-pivot"><span>PIVOT</span><i>↘</i></div>
-          <div class="tradeoff-new">
-            <span>CHOSEN APPROACH</span>
-            <h3>Accurate by design</h3>
-            <div class="new-flow"><i>PayPay</i><b>→</b><i>CSV</i><b>→</b><i class="certain">✓</i></div>
-            <small>見える・確認できる・重複候補に気づける</small>
+            <article class="reveal"><span>01</span><h3>差がすぐ分かる。</h3><p>自分・全体平均・平均との差を同じ画面で確認できます。</p></article>
+            <article class="reveal"><span>02</span><h3>失敗しても止めない。</h3><p>問題のある行だけを除き、行番号と理由を返して集計を続けます。</p></article>
+            <article class="reveal"><span>03</span><h3>明細は共有しない。</h3><p>比較に使うのは匿名集計だけ。管理者にも生明細を見せません。</p></article>
           </div>
         </div>
       </section>
@@ -423,26 +390,26 @@
         <div class="shell">
           <div class="architecture-heading">
             <div>
-              <div class="section-label section-label-light reveal"><span>04</span> / ARCHITECTURE</div>
-              <h2 id="architecture-title" class="display-title reveal">Signals in.<br /><span>Clarity out.</span></h2>
+              <div class="section-label section-label-light reveal"><span>03</span> / ARCHITECTURE &amp; STATUS</div>
+              <h2 id="architecture-title" class="display-title reveal">CSV in.<br /><span>Anonymous insight out.</span></h2>
             </div>
-            <p class="reveal">データの入口は違っても、処理は小さく、責務は明確に。AWSのマネージドサービスを組み合わせたサーバーレス設計です。</p>
+            <p class="reveal">原本CSVを残さず、正規化済みデータと匿名集計だけを保存。Cognitoの権限分離とAWSのサーバーレス構成で、安全な比較分析を設計しました。</p>
           </div>
 
           <div class="architecture-map reveal" aria-label="SpendOpsのシステム構成図">
             <div class="flow-column source-column">
               <span class="flow-label">01 / SOURCES</span>
-              <article><span class="arch-icon arch-pay">P</span><div><small>EXPENSE</small><strong>PayPay CSV</strong></div><i>FILE</i></article>
-              <article><span class="arch-icon arch-card">J</span><div><small>EXPENSE</small><strong>JCB Gmail</strong></div><i>MAIL</i></article>
-              <article><span class="arch-icon arch-bank">Y</span><div><small>IN / OUT — SEPARATE</small><strong>Bank Gmail</strong></div><i>MAIL</i></article>
+              <article><span class="arch-icon arch-pay">P</span><div><small>UTF-8</small><strong>PayPay CSV</strong></div><i>CSV</i></article>
+              <article><span class="arch-icon arch-card">J</span><div><small>SHIFT_JIS</small><strong>JCB CSV</strong></div><i>CSV</i></article>
+              <article><span class="arch-icon arch-bank">V</span><div><small>SHIFT_JIS</small><strong>VISA CSV</strong></div><i>CSV</i></article>
             </div>
 
             <div class="flow-connector connector-one" aria-hidden="true"><span></span><span></span><span></span><b></b></div>
 
             <div class="flow-column intake-column">
-              <span class="flow-label">02 / INTAKE</span>
-              <article class="arch-service"><span class="aws-cube">↑</span><div><small>PAYPAY / MANUAL</small><strong>Browser Upload</strong></div></article>
-              <article class="arch-service"><span class="aws-cube">G</span><div><small>JCB &amp; BANK / 30 MIN</small><strong>Gmail + GAS</strong></div></article>
+              <span class="flow-label">02 / ACCESS</span>
+              <article class="arch-service"><span class="aws-cube">↑</span><div><small>USER ACTION</small><strong>Browser Upload</strong></div></article>
+              <article class="arch-service"><span class="aws-cube">C</span><div><small>USERS / ADMINS</small><strong>Cognito Auth</strong></div></article>
               <span class="flow-pulse" aria-hidden="true"></span>
             </div>
 
@@ -451,8 +418,8 @@
             <div class="flow-column data-column">
               <span class="flow-label">03 / AWS CORE</span>
               <article class="arch-service"><span class="aws-cube">◆</span><div><small>INGEST</small><strong>API Gateway</strong></div></article>
-              <article class="arch-service"><span class="aws-cube">λ</span><div><small>VALIDATE &amp; STORE</small><strong>Lambda</strong></div></article>
-              <article class="arch-service arch-storage"><span class="aws-cube">▦</span><div><small>FILTERED CSV / TRANSACTIONS</small><strong>S3 + DynamoDB</strong></div></article>
+              <article class="arch-service"><span class="aws-cube">λ</span><div><small>NORMALIZE &amp; AGGREGATE</small><strong>Lambda</strong></div></article>
+              <article class="arch-service arch-storage"><span class="aws-cube">▦</span><div><small>TRANSACTIONS / GROUP STATS</small><strong>DynamoDB</strong></div></article>
             </div>
 
             <div class="flow-connector connector-three" aria-hidden="true"><b></b></div>
@@ -464,82 +431,25 @@
                 <div class="arch-view-body"><span class="mini-donut"></span><div><i></i><i></i><i></i></div></div>
               </article>
               <strong>SpendOps Dashboard</strong>
-              <small>PLANNED: Next.js / Cognito</small>
+              <small>PLANNED: Next.js / Cognito / AWS</small>
             </div>
           </div>
 
           <div class="architecture-meta">
-            <div class="reveal"><span>SYNC DESIGN</span><strong>30<small>min</small></strong><p>JCB・銀行メールを定期処理</p></div>
-            <div class="reveal"><span>DATA SOURCES</span><strong>03</strong><p>CSVとメールを適材適所で統合</p></div>
-            <div class="reveal"><span>CORE CATEGORIES</span><strong>04</strong><p>食費・交通費・日用品・雑費</p></div>
+            <div class="reveal"><span>DATA SOURCES</span><strong>03</strong><p>PayPay・JCB・VISA CSV</p></div>
+            <div class="reveal"><span>ACCESS ROLES</span><strong>02</strong><p>一般ユーザーと管理者を分離</p></div>
+            <div class="reveal"><span>RAW CSV STORED</span><strong>00</strong><p>原本は処理後に破棄</p></div>
             <div class="reveal architecture-status"><span>PROJECT STATUS</span><strong><i></i> BUILDING</strong><p>設計・UIプロトタイプ段階</p></div>
           </div>
         </div>
       </section>
 
-      <section class="privacy section" aria-labelledby="privacy-title">
-        <div class="shell privacy-layout">
-          <div class="privacy-copy">
-            <div class="section-label reveal"><span>05</span> / PRIVACY BY DESIGN</div>
-            <h2 id="privacy-title" class="display-title reveal">守ることも、<br /><span>機能のひとつ。</span></h2>
-            <p class="reveal">金融データを扱うからこそ、保存する情報は必要最小限に。利便性だけでなく「保存しない」という設計判断も、体験の一部です。</p>
-            <div class="privacy-tags reveal"><span>MINIMUM DATA</span><span>SECRET TOKEN</span><span>NO RAW EMAIL</span></div>
-          </div>
-
-          <div class="privacy-card reveal">
-            <div class="privacy-card-head"><span>DATA POLICY / 01</span><i class="privacy-lock">⌁</i></div>
-            <div class="policy-row policy-keep"><span class="policy-symbol">✓</span><div><small>KEEP ONLY WHAT MATTERS</small><strong>日付・金額・店舗・カテゴリ</strong></div></div>
-            <div class="policy-divider"><span>THE BOUNDARY</span></div>
-            <div class="policy-row policy-never"><span class="policy-symbol">×</span><div><small>NEVER STORE</small><strong>カード番号・認証情報・メール本文全文</strong></div></div>
-            <p>ログにも個人情報を残さず、GASからAPI Gatewayへの送信は秘密トークンで保護する方針です。</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="process section" id="process" aria-labelledby="process-title">
-        <div class="shell">
-          <div class="process-heading">
-            <div>
-              <div class="section-label reveal"><span>06</span> / PROCESS &amp; SCOPE</div>
-              <h2 id="process-title" class="display-title reveal">完成を装わず、<br /><span>現在地まで見せる。</span></h2>
-            </div>
-            <p class="reveal">このプロジェクトは現在、要件・アーキテクチャ・UIプロトタイプを固めた開発中のケーススタディです。</p>
-          </div>
-
-          <ol class="process-list">
-            <li class="is-done reveal"><span>01</span><div><small>DISCOVER</small><h3>課題・取得制約の整理</h3><p>決済ごとの取得方法と、保存すべき最小データを定義。</p></div><b>DONE</b></li>
-            <li class="is-done reveal"><span>02</span><div><small>DEFINE</small><h3>要件・AWS構成設計</h3><p>準自動取込と月次分析を中心にMVPの範囲を設計。</p></div><b>DONE</b></li>
-            <li class="is-current reveal"><span>03</span><div><small>DESIGN</small><h3>UIプロトタイプ</h3><p>支出を理解しやすい情報設計とビジュアルを検証。</p></div><b>NOW</b></li>
-            <li class="reveal"><span>04</span><div><small>BUILD</small><h3>フロント・API実装</h3><p>Next.jsとAWSサーバーレス構成で段階的に実装。</p></div><b>NEXT</b></li>
-          </ol>
-
-          <div class="stack-row reveal">
-            <span class="stack-label">PLANNED MVP STACK</span>
-            <div><span>Next.js</span><span>JavaScript</span><span>Tailwind CSS</span><span>Python</span><span>AWS Lambda</span><span>DynamoDB</span><span>S3</span><span>Cognito</span><span>Gmail</span><span>Google Apps Script</span></div>
-          </div>
-          <div class="next-phase reveal"><span>NEXT PHASE / AWS COST EXPLORER</span><p>MVPでは生活費分析を優先。次のフェーズでAWS利用料金も同じ画面へ統合する構想です。</p></div>
-        </div>
-      </section>
-
-      <section class="closing" aria-labelledby="closing-title">
-        <div class="closing-orbit" aria-hidden="true"></div>
-        <div class="shell closing-inner">
-          <span class="closing-kicker reveal">SPENDOPS / PERSONAL FINOPS</span>
-          <h2 id="closing-title" class="reveal">Make spending<br /><em>understandable.</em></h2>
-          <p class="reveal">支出の履歴を、<br />次の選択につながる手がかりへ。</p>
-          <div class="closing-actions reveal">
-            <a class="button button-lime" href="#process">開発プロセスを見る <span>↗</span></a>
-            <a class="closing-link" href="#top">ページ上部へ <span>↑</span></a>
-          </div>
-        </div>
-        <div class="closing-word" aria-hidden="true">SPENDOPS</div>
-      </section>
     </main>
 
     <footer class="site-footer">
       <div class="shell">
         <a class="brand footer-brand" href="#top"><span class="brand-mark">S/</span><span class="brand-name">SpendOps</span></a>
-        <p>Portfolio case study site / UI prototype.</p>
+        <p>Multi-user CSV analytics / UI prototype.</p>
         <span>© <span data-year>2026</span> / TOKYO, JP</span>
       </div>
     </footer>
