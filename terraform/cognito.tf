@@ -3,6 +3,7 @@ resource "aws_cognito_user_pool" "main" {
   name                     = "${local.name_prefix}-users"
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
+  deletion_protection      = var.protect_persistent_data ? "ACTIVE" : "INACTIVE"
 
   password_policy {
     minimum_length                   = 12

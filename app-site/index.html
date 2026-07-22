@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="CSVを端末内で月別分析するSpendOps Dashboard" />
+    <meta name="description" content="PayPayやカードの利用明細から支出を分かりやすく振り返るSpendOps Dashboard" />
     <meta name="theme-color" content="#101713" />
     <title>SpendOps Dashboard</title>
     <link rel="stylesheet" href="./styles.css" />
@@ -14,91 +14,103 @@
   </head>
   <body>
     <header class="topbar">
-      <div class="brand"><span class="brand-mark">S/</span><strong>SpendOps</strong></div>
+      <div class="brand-area">
+        <div class="brand"><span class="brand-mark">S/</span><strong>SpendOps</strong></div>
+        <button class="menu-button" id="data-menu-toggle" type="button" aria-controls="control-panel" aria-expanded="false">
+          <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span id="data-menu-label">明細を読み込む</span>
+        </button>
+      </div>
       <div class="topbar-actions">
         <span class="auth-status" id="auth-status">認証確認中</span>
         <button class="text-button" id="load-saved" type="button" hidden>保存済み分析</button>
         <button class="auth-button" id="auth-open" type="button">ログイン</button>
         <button class="text-button" id="auth-logout" type="button" hidden>ログアウト</button>
-        <div class="connection" id="connection-status" role="status"><i></i><span>CSV待機中</span></div>
-        <button class="text-button" id="run-demo" type="button">合成デモを見る</button>
+        <div class="connection" id="connection-status" role="status"><i></i><span>明細の読み込み待ち</span></div>
+        <button class="text-button" id="run-demo" type="button">お試し画面を見る</button>
       </div>
     </header>
 
-    <main class="workspace">
-      <aside class="control-panel" aria-labelledby="upload-title">
+    <main class="workspace is-menu-collapsed">
+      <aside class="control-panel" id="control-panel" aria-labelledby="upload-title" aria-hidden="true">
         <div class="control-heading">
-          <span class="kicker">PERSONAL ANALYSIS</span>
-          <h1 id="upload-title">CSV分析</h1>
+          <div><span class="kicker">SPENDING FILE</span><h1 id="upload-title">利用明細を読み込む</h1></div>
+          <button class="panel-close" id="data-menu-close" type="button" aria-label="読み込み欄を閉じる">×</button>
         </div>
 
         <form class="upload-form" id="csv-form">
           <label class="drop-zone" for="csv-file">
             <span class="step-number">1</span>
-            <span class="file-icon">CSV</span>
+            <span class="file-icon">明細</span>
             <span class="file-copy">
-              <strong id="file-label">CSVを選ぶ</strong>
-              <small>PayPay / JCB / VISA・複数選択可</small>
+              <strong id="file-label">ファイルを選ぶ</strong>
+              <small>PayPay / JCB / VISA・複数選べます</small>
             </span>
             <input id="csv-file" name="csv-file" type="file" accept=".csv,text/csv" multiple />
           </label>
-          <button class="primary-button" type="submit"><span>2</span> 選択したCSVを分析</button>
+          <button class="primary-button" type="submit"><span>2</span> 選んだ明細を読み取る</button>
           <p class="upload-message" id="upload-message" role="status">ファイルを選択してください</p>
         </form>
 
         <section class="analysis-controls" id="analysis-controls" hidden>
-          <label class="month-field" for="month-select">
-            <span>3　分析する月</span>
-            <select id="month-select"></select>
-          </label>
           <p class="coverage-text" id="coverage-text"></p>
 
-          <div class="integrity-grid" aria-label="CSV整合性確認">
-            <div><span>採用</span><strong id="accepted-count">—</strong></div>
+          <div class="integrity-grid" aria-label="読み込み結果">
+            <div><span>読み込み</span><strong id="accepted-count">—</strong></div>
             <div><span>対象外</span><strong id="ignored-count">—</strong></div>
-            <div><span>エラー</span><strong id="invalid-count">—</strong></div>
-            <div><span>検出月</span><strong id="detected-months">—</strong></div>
+            <div><span>要確認</span><strong id="invalid-count">—</strong></div>
+            <div><span>月数</span><strong id="detected-months">—</strong></div>
           </div>
           <p class="integrity-note" id="integrity-note"></p>
         </section>
 
-        <div class="privacy-chip"><span>✓</span> 原本CSV・明細は送信せず、ログイン時は月別集計だけDB保存</div>
+        <div class="privacy-chip"><span>✓</span> 選んだファイル自体は送信しません。ログイン中は支出の内容だけを安全に保存します。</div>
       </aside>
 
       <section class="result-area" id="dashboard" aria-labelledby="dashboard-title">
         <div class="empty-state" id="empty-state">
-          <span>01</span>
-          <strong>左のCSVを選択</strong>
-          <i></i>
-          <span>02</span>
-          <strong>分析ボタンを押す</strong>
+          <span>1</span>
+          <strong>上の「明細を読み込む」から始めてください</strong>
         </div>
 
         <div class="result-content" id="result-content" hidden>
           <div class="result-heading">
-            <div>
+            <div class="report-title-block">
               <span class="kicker">ANALYSIS RESULT</span>
-              <h2 id="dashboard-title"><span id="report-month">—</span> レポート</h2>
+              <div class="report-title-row">
+                <h2 id="dashboard-title"><span id="report-month">—</span> レポート</h2>
+                <label class="report-period-field" id="report-period-control" for="month-select" hidden>
+                  <span>表示する期間</span>
+                  <select id="month-select" aria-label="レポートの表示期間"></select>
+                </label>
+              </div>
             </div>
             <div class="heading-status">
-              <div class="scope-switch" id="scope-switch" role="group" aria-label="支払い方法の分析切替" hidden>
-                <button class="is-active" id="all-scope" type="button" aria-pressed="true">全支払い</button>
-                <button id="paypay-scope" type="button" aria-pressed="false">PayPay</button>
-                <button id="card-scope" type="button" aria-pressed="false">カード</button>
+              <div class="scope-control" id="scope-control" hidden>
+                <span class="switch-label">見る範囲</span>
+                <div class="scope-switch" id="scope-switch" role="group" aria-label="見る範囲の切替">
+                  <button class="is-active" id="all-scope" type="button" aria-pressed="true">まとめて</button>
+                  <button id="paypay-scope" type="button" aria-pressed="false">PayPayだけ</button>
+                  <button id="card-scope" type="button" aria-pressed="false">カードだけ</button>
+                </div>
               </div>
-              <div class="comparison-switch" role="group" aria-label="比較方法">
-                <button class="is-active" id="group-mode" type="button" aria-pressed="true">他者比較</button>
-                <button id="personal-mode" type="button" aria-pressed="false">個人比較</button>
+              <div class="comparison-control" id="comparison-control">
+                <span class="switch-label">比べ方</span>
+                <div class="comparison-switch" role="group" aria-label="比べ方">
+                  <button class="is-active" id="group-mode" type="button" aria-pressed="true"><i aria-hidden="true">◎</i><span>みんなと比べる<small>同じ条件の平均</small></span></button>
+                  <button id="personal-mode" type="button" aria-pressed="false"><i aria-hidden="true">↗</i><span>自分の過去と比べる<small>これまでの月平均</small></span></button>
+                </div>
               </div>
               <span class="dataset-badge" id="dataset-badge">—</span>
               <span class="comparison-status" id="comparison-status">—</span>
-              <button class="detail-button" id="open-transactions" type="button" hidden>支払い明細・分類</button>
+              <button class="detail-button" id="open-transactions" type="button" hidden>明細を見る・使いみちを直す</button>
+              <button class="detail-button category-review-button" id="open-category-review" type="button" hidden>分類をまとめて見直す</button>
             </div>
           </div>
 
           <div class="metric-grid" aria-live="polite">
             <article class="metric metric-main">
-              <span>月間支出</span>
+              <span id="total-expense-label">今月の支出</span>
               <strong id="total-expense">—</strong>
               <small id="average-comparison">—</small>
             </article>
@@ -108,25 +120,21 @@
               <small id="comparison-note">—</small>
             </article>
             <article class="metric">
-              <span>取引件数</span>
+              <span>支払い回数</span>
               <strong id="transaction-count">—</strong>
               <small id="source-count">—</small>
             </article>
-            <article class="metric">
-              <span>前月比</span>
+            <article class="metric metric-change" id="month-over-month-metric">
+              <span id="period-change-label">前の月から</span>
               <strong id="month-over-month">—</strong>
-              <small id="previous-month-note">本人データ内で比較</small>
+              <small id="previous-month-note">自分の前月と比較</small>
             </article>
           </div>
 
           <div class="analysis-grid">
             <article class="panel category-panel">
               <div class="panel-heading">
-                <div><span id="breakdown-kicker">BY CATEGORY</span><h3 id="breakdown-title">カテゴリ別</h3></div>
-                <div class="view-switch" role="group" aria-label="支出内訳の表示方法">
-                  <button class="is-active" id="category-view" type="button" aria-pressed="true">カテゴリ</button>
-                  <button id="payment-view" type="button" aria-pressed="false">支払い方法</button>
-                </div>
+                <div><span id="breakdown-kicker">SPENDING BREAKDOWN</span><h3 id="breakdown-title">支出の内訳</h3></div>
               </div>
               <div class="category-layout">
                 <div class="donut" id="category-donut"><span><small>TOTAL</small><b id="donut-total">—</b></span></div>
@@ -135,21 +143,15 @@
             </article>
 
             <article class="panel trend-panel">
-              <div class="panel-heading"><div><span>MONTHLY TREND</span><h3>月別推移</h3></div><small>最大12か月</small></div>
-              <div class="monthly-trend" id="monthly-trend"></div>
+              <div class="panel-heading"><div><span>MONTHLY TREND</span><h3>月ごとの支出</h3></div><small>横線を目安に比較</small></div>
+              <div class="monthly-trend" id="monthly-trend" aria-label="月ごとの支出金額"></div>
             </article>
 
-            <div class="side-stack">
-              <article class="insight-panel">
-                <span>✦ MAIN ANALYSIS</span>
-                <h3>分析コメント</h3>
-                <p id="insight-text">—</p>
-              </article>
-              <article class="panel source-panel">
-                <div class="panel-heading"><div><span>PAYMENT</span><h3>支払い方法</h3></div></div>
-                <div class="source-list" id="source-list"></div>
-              </article>
-            </div>
+            <article class="insight-panel">
+              <span>✦ NEXT ACTION</span>
+              <h3>結果から分かること</h3>
+              <div class="insight-content" id="insight-text">—</div>
+            </article>
           </div>
 
           <p class="generated-at" id="generated-at">—</p>
@@ -162,23 +164,91 @@
         <header class="transaction-dialog-header">
           <div>
             <span class="kicker">PAYMENT DETAILS</span>
-            <h2 id="transaction-title">支払い明細・カテゴリ編集</h2>
+            <h2 id="transaction-title">支払い明細・使いみちの編集</h2>
             <p id="transaction-context">—</p>
+          </div>
+          <div class="transaction-filters">
+            <label class="transaction-filter" for="transaction-period-filter">
+              <span>明細の期間</span>
+              <select id="transaction-period-filter">
+                <option value="all">読み込んだ全期間</option>
+                <option value="month">選択中の月</option>
+              </select>
+            </label>
+            <label class="transaction-filter" for="transaction-merchant-filter">
+              <span>利用店・チェーンで絞る</span>
+              <select id="transaction-merchant-filter"><option value="">すべての利用店・チェーン</option></select>
+            </label>
+            <div class="transaction-filter-summary" aria-live="polite">
+              <span>絞り込み結果</span>
+              <strong id="transaction-filter-total">—</strong>
+              <small id="transaction-filter-count">—</small>
+            </div>
           </div>
           <button id="close-transactions" type="button" aria-label="支払い明細を閉じる">×</button>
         </header>
         <div class="transaction-table" role="table" aria-label="支払い明細一覧">
           <div class="transaction-table-head" role="row">
-            <span>日付</span><span>取引先／利用店</span><span>カテゴリ</span><span>方法</span><span>金額</span>
+            <span>日付</span><span>取引先／利用店</span><span>使いみち</span><span>金額</span>
           </div>
           <div id="transaction-rows"></div>
         </div>
         <footer class="transaction-dialog-footer">
-          <p>CSVに商品名がない場合は利用店名を表示します。カテゴリ変更は同じ支払い方法・利用店へ一括反映し、ログイン時も利用店名ではなく月別集計だけをDBへ保存します。</p>
+          <div class="transaction-footer-copy">
+            <p>品名がない場合は利用店名を表示します。使いみちの変更は同じ利用店の明細へまとめて反映します。選んだファイルそのものやカード番号は保存しません。</p>
+            <small>分類リストには利用先が含まれます。修正後のリストは次回の再構築でも使えるため、ご自身で安全に保管してください。</small>
+          </div>
+          <div class="category-correction-actions">
+            <button id="export-other-categories" type="button">「その他」の分類リストを書き出す</button>
+            <label for="category-correction-file">修正した分類リストを反映
+              <input id="category-correction-file" type="file" accept=".csv,text/csv" />
+            </label>
+          </div>
           <div class="transaction-pagination">
             <button id="transaction-prev" type="button">前へ</button>
             <span id="transaction-page">1 / 1</span>
             <button id="transaction-next" type="button">次へ</button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <dialog class="category-review-dialog" id="category-review-dialog" aria-labelledby="category-review-title">
+      <div class="category-review-shell">
+        <header class="category-review-header">
+          <div>
+            <span class="kicker">PERSONAL CATEGORY SETTINGS</span>
+            <h2 id="category-review-title">使いみちの見直し</h2>
+            <p>利用先ごとに一度直すと、このアカウントでは次回の読み込みから自動で同じ使いみちへ分けます。</p>
+          </div>
+          <button id="close-category-review" type="button" aria-label="使いみちの見直しを閉じる">×</button>
+        </header>
+        <div class="category-review-toolbar">
+          <label for="category-review-filter"><span>表示する利用先</span>
+            <select id="category-review-filter">
+              <option value="other">「その他」だけ</option>
+              <option value="all">すべて</option>
+            </select>
+          </label>
+          <strong id="category-review-count">—</strong>
+        </div>
+        <div class="category-review-table" role="table" aria-label="利用先ごとの使いみち">
+          <div class="category-review-table-head" role="row">
+            <span>利用先</span><span>支払い元</span><span>件数</span><span>使いみち</span>
+          </div>
+          <div id="category-review-rows"></div>
+        </div>
+        <footer class="category-review-footer">
+          <div>
+            <p class="category-review-message" id="category-review-message" aria-live="polite">—</p>
+            <small>学習内容は本人のアカウントだけに保存します。利用先名は照合用の文字列に変換して保存します。</small>
+          </div>
+          <div class="category-review-actions">
+            <button id="export-category-rules" type="button">学習内容の控えを書き出す</button>
+            <label for="category-rule-backup-file">控えを読み戻す
+              <input id="category-rule-backup-file" type="file" accept=".csv,text/csv" />
+            </label>
+            <button class="category-review-save" id="save-category-review" type="button">このアカウントへ保存</button>
           </div>
         </footer>
       </div>
@@ -202,7 +272,7 @@
         <form class="auth-form" id="login-form" data-auth-panel="login">
           <label>メールアドレス<input id="login-email" name="email" type="email" autocomplete="username" required /></label>
           <label>パスワード<input name="password" type="password" autocomplete="current-password" required /></label>
-          <button class="primary-button" type="submit">ログインしてDB保存を有効化</button>
+          <button class="primary-button" type="submit">ログインして結果を保存する</button>
         </form>
 
         <form class="auth-form" id="signup-form" data-auth-panel="signup" hidden>
@@ -210,7 +280,7 @@
           <label>パスワード<input name="password" type="password" autocomplete="new-password" minlength="12" required /></label>
           <label>パスワード確認<input name="password_confirm" type="password" autocomplete="new-password" minlength="12" required /></label>
           <small>12文字以上で、大文字・小文字・数字・記号を含めてください。</small>
-          <label class="consent-field"><input name="data_consent" type="checkbox" required /> 分析結果を匿名集計し、他ユーザーとの比較へ利用することに同意します</label>
+          <label class="consent-field"><input name="data_consent" type="checkbox" required /> 個人が分からない形で結果をまとめ、みんなとの比較に利用することに同意します</label>
           <button class="primary-button" type="submit">確認メールを送信</button>
         </form>
 
@@ -222,7 +292,7 @@
         </form>
 
         <p class="auth-message" id="auth-message" role="status"></p>
-        <p class="auth-privacy">パスワードと確認コードは保存しません。DBには原本CSVではなく月別集計だけを保存します。</p>
+        <p class="auth-privacy">パスワードと確認コード、選んだファイルそのものは保存しません。支出を振り返るために必要な内容だけを保存します。</p>
       </div>
     </dialog>
   </body>

@@ -10,7 +10,28 @@ output "api_endpoint" {
 
 output "site_url" {
   description = "CloudFrontで公開するMVP閲覧サイト"
-  value       = "https://${aws_cloudfront_distribution.web.domain_name}"
+  value       = var.activate_custom_domain ? "https://${var.custom_domain_name}" : "https://${aws_cloudfront_distribution.web.domain_name}"
+}
+
+output "cloudfront_domain_name" {
+  description = "Cloudflareの公開用CNAMEが参照するCloudFrontドメイン"
+  value       = aws_cloudfront_distribution.web.domain_name
+}
+
+output "custom_domain_validation_records" {
+  description = "CloudflareへDNSのみで追加するACM証明書検証用CNAME"
+  value = {
+    for option in aws_acm_certificate.cloudfront.domain_validation_options : option.domain_name => {
+      name  = option.resource_record_name
+      type  = option.resource_record_type
+      value = option.resource_record_value
+    }
+  }
+}
+
+output "custom_domain_certificate_arn" {
+  description = "CloudFront用ACM証明書の識別子"
+  value       = aws_acm_certificate.cloudfront.arn
 }
 
 output "web_bucket_name" {
@@ -38,7 +59,7 @@ output "dynamodb_table_names" {
   value = {
     transactions           = aws_dynamodb_table.transactions.name
     user_monthly_summaries = aws_dynamodb_table.user_monthly_summaries.name
-    group_monthly_stats    = aws_dynamodb_table.group_monthly_stats.name
     import_batches         = aws_dynamodb_table.import_batches.name
+    category_rules         = aws_dynamodb_table.category_rules.name
   }
 }

@@ -233,7 +233,7 @@ function updateAuthUi() {
   document.querySelector("#auth-open").hidden = Boolean(user);
   document.querySelector("#auth-logout").hidden = !user;
   document.querySelector("#load-saved").hidden = !user;
-  document.querySelector("#auth-status").textContent = user ? "ログイン済み・DB保存有効" : "未ログイン・端末内のみ";
+  document.querySelector("#auth-status").textContent = user ? "ログイン済み・結果を保存" : "未ログイン・この画面だけに表示";
   document.querySelector("#auth-status").classList.toggle("is-authenticated", Boolean(user));
 }
 
@@ -299,7 +299,7 @@ async function initializeAuthUi() {
       return;
     }
     if (!form.elements.data_consent.checked) {
-      setAuthMessage("匿名集計への利用同意が必要です。", "error");
+      setAuthMessage("個人が分からない形で結果をまとめることへの同意が必要です。", "error");
       return;
     }
     button.disabled = true;

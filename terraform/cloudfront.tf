@@ -25,6 +25,7 @@ resource "aws_cloudfront_distribution" "web" {
   comment             = "SpendOps Dashboard ${var.environment}"
   default_root_object = "index.html"
   price_class         = "PriceClass_200"
+  aliases             = var.activate_custom_domain ? [var.custom_domain_name] : []
 
   origin {
     domain_name              = aws_s3_bucket.web.bucket_regional_domain_name
@@ -56,7 +57,10 @@ resource "aws_cloudfront_distribution" "web" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn            = var.activate_custom_domain ? aws_acm_certificate.cloudfront.arn : null
+    cloudfront_default_certificate = !var.activate_custom_domain
+    minimum_protocol_version       = var.activate_custom_domain ? "TLSv1.2_2021" : "TLSv1"
+    ssl_support_method             = var.activate_custom_domain ? "sni-only" : null
   }
 }
 

@@ -1,11 +1,12 @@
 """SpendOps Dashboard API.
 
-原本CSV、認証情報、メールアドレスは受け取らず、ブラウザで作成した月別集計だけを保存する。
-リクエスト本文や取引内容はログへ出力しない。
+原本CSV、ファイル名、カード番号、口座番号、認証情報は受け取らない。
+ブラウザで正規化した個別取引と月別集計だけを保存し、リクエスト本文や取引内容はログへ出力しない。
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -24,11 +25,19 @@ DEMO_GROUP_AVERAGE = 197_400
 DEMO_PREVIOUS_TOTAL = 197_500
 MINIMUM_GROUP_PARTICIPANTS = 5
 MAX_SUMMARIES_PER_IMPORT = 60
+MAX_TRANSACTIONS_PER_IMPORT = 5_000
+MAX_TRANSACTIONS_PER_RESPONSE = 5_000
+MAX_CATEGORY_RULES_PER_REQUEST = 500
+MAX_CATEGORY_RULES_PER_RESPONSE = 2_000
 ALLOWED_SOURCE_TYPES = {"PAYPAY", "CARD"}
 ALLOWED_REPORT_SOURCES = {"PAYPAY", "CARD", "ALL"}
-ALLOWED_CATEGORIES = {"食費", "日用品", "交通費", "娯楽", "光熱費", "通信費", "医療費", "衣服費", "住居費", "その他"}
+ALLOWED_TRANSACTION_SOURCES = {"PAYPAY", "JCB", "VISA", "CARD"}
+ALLOWED_CATEGORIES = {"食費", "日用品", "交通費", "娯楽", "光熱費", "通信費", "医療費", "衣服費", "住居費", "ネットでの購入", "その他"}
 ALLOWED_PAYMENT_METHODS = {"PayPay", "JCB", "VISA", "カード"}
 MONTH_PATTERN = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
+DATE_PATTERN = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$")
+SENSITIVE_NUMBER_PATTERN = re.compile(r"(?<!\d)\d{7,19}(?!\d)")
+CATEGORY_RULE_KEY_PATTERN = re.compile(r"^(PAYPAY|JCB|VISA|CARD)#[0-9a-f]{64}$")
 
 DEMO_GROUP_CATEGORY_AVERAGES = {
     "食費": 84_200,
@@ -247,6 +256,92 @@ def validate_summary(value: Any) -> dict[str, Any]:
     }
 
 
+def _validated_text(value: Any, maximum_length: int) -> str:
+    if not isinstance(value, str):
+        raise ValueError("取引文字列の形式が不正です。")
+    normalized = " ".join(value.split()).strip()
+    if not normalized or len(normalized) > maximum_length:
+        raise ValueError("取引文字列の長さが不正です。")
+    return normalized
+
+
+def _validated_merchant(value: Any) -> str:
+    normalized = _validated_text(value, 160)
+    return SENSITIVE_NUMBER_PATTERN.sub("[redacted]", normalized)
+
+
+def _transaction_source(value: Any) -> str:
+    normalized = str(value or "").strip().upper()
+    if normalized not in ALLOWED_TRANSACTION_SOURCES:
+        raise ValueError("支払い元が不正です。")
+    return normalized
+
+
+def _summary_scope_for_transaction(source: str) -> str:
+    return "PAYPAY" if source == "PAYPAY" else "CARD"
+
+
+def validate_transaction(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError("個別取引の形式が不正です。")
+    transaction_date = str(value.get("date", ""))
+    if not DATE_PATTERN.fullmatch(transaction_date):
+        raise ValueError("取引日が不正です。")
+    try:
+        datetime.strptime(transaction_date, "%Y-%m-%d")
+    except ValueError as error:
+        raise ValueError("取引日が不正です。") from error
+    category = _validated_text(value.get("category"), 40)
+    if category not in ALLOWED_CATEGORIES:
+        raise ValueError("カテゴリが不正です。")
+    return {
+        "date": transaction_date,
+        "amount": _validated_nonnegative_int(value.get("amount"), 1_000_000_000),
+        "merchant": _validated_merchant(value.get("merchant")),
+        "category": category,
+        "source": _transaction_source(value.get("source")),
+        "occurrence": _validated_nonnegative_int(value.get("occurrence", 0), 10_000),
+    }
+
+
+def _validate_transaction_summaries(
+    summaries: list[dict[str, Any]], transactions: list[dict[str, Any]]
+) -> None:
+    actual: dict[tuple[str, str], dict[str, int]] = defaultdict(
+        lambda: {"total_expense": 0, "transaction_count": 0}
+    )
+    for transaction in transactions:
+        key = (transaction["date"][:7], _summary_scope_for_transaction(transaction["source"]))
+        actual[key]["total_expense"] += transaction["amount"]
+        actual[key]["transaction_count"] += 1
+
+    expected = {
+        (summary["month"], summary["source_type"]): {
+            "total_expense": summary["total_expense"],
+            "transaction_count": summary["transaction_count"],
+        }
+        for summary in summaries
+    }
+    if actual != expected:
+        raise ValueError("個別取引と月別集計が一致しません。")
+
+
+def _transaction_key(transaction: dict[str, Any]) -> str:
+    fingerprint = json.dumps(
+        [
+            transaction["date"],
+            transaction["amount"],
+            transaction["merchant"],
+            transaction["source"],
+            transaction["occurrence"],
+        ],
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    digest = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()[:32]
+    return f"{transaction['date']}#{transaction['source']}#{digest}"
+
+
 def save_analysis(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     raw_summaries = payload.get("summaries")
     if not isinstance(raw_summaries, list) or not 1 <= len(raw_summaries) <= MAX_SUMMARIES_PER_IMPORT:
@@ -255,10 +350,39 @@ def save_analysis(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     if len({(item["month"], item["source_type"]) for item in summaries}) != len(summaries):
         raise ValueError("同じ月と支払い種別が重複しています。")
 
+    raw_transactions = payload.get("transactions")
+    if (
+        not isinstance(raw_transactions, list)
+        or not 1 <= len(raw_transactions) <= MAX_TRANSACTIONS_PER_IMPORT
+    ):
+        raise ValueError("保存する個別取引の件数が不正です。")
+    transactions = [validate_transaction(item) for item in raw_transactions]
+    _validate_transaction_summaries(summaries, transactions)
+
+    transactions_table = _table("TRANSACTIONS_TABLE")
     summaries_table = _table("USER_MONTHLY_SUMMARIES_TABLE")
     batches_table = _table("IMPORT_BATCHES_TABLE")
     imported_at = datetime.now(timezone.utc).isoformat()
     batch_id = str(uuid.uuid4())
+
+    with transactions_table.batch_writer(
+        overwrite_by_pkeys=["user_id", "transaction_key"]
+    ) as batch:
+        for transaction in transactions:
+            batch.put_item(
+                Item={
+                    "user_id": user_id,
+                    "transaction_key": _transaction_key(transaction),
+                    "transaction_date": transaction["date"],
+                    "amount": transaction["amount"],
+                    "merchant": transaction["merchant"],
+                    "category": transaction["category"],
+                    "source": transaction["source"],
+                    "import_batch_id": batch_id,
+                    "imported_at": imported_at,
+                    "schema_version": 2,
+                }
+            )
 
     with summaries_table.batch_writer(overwrite_by_pkeys=["user_id", "month"]) as batch:
         for summary in summaries:
@@ -284,6 +408,7 @@ def save_analysis(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
             "user_id": user_id,
             "import_batch_id": batch_id,
             "summary_count": len(summaries),
+            "transaction_count": len(transactions),
             "source_types": sorted({item["source_type"] for item in summaries}),
             "report_months": sorted({item["month"] for item in summaries}),
             "accepted_count": _validated_nonnegative_int(validation.get("accepted_count", 0), 1_000_000),
@@ -293,7 +418,12 @@ def save_analysis(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
             "imported_at": imported_at,
         }
     )
-    return {"saved_summary_count": len(summaries), "import_batch_id": batch_id, "saved_at": imported_at}
+    return {
+        "saved_transaction_count": len(transactions),
+        "saved_summary_count": len(summaries),
+        "import_batch_id": batch_id,
+        "saved_at": imported_at,
+    }
 
 
 def _query_user_summaries(user_id: str) -> list[dict[str, Any]]:
@@ -332,6 +462,121 @@ def list_saved_reports(user_id: str) -> list[dict[str, Any]]:
         key=lambda item: (item["month"], item["source_type"]),
         reverse=True,
     )
+
+
+def list_saved_transactions(user_id: str) -> dict[str, Any]:
+    """本人に紐づく正規化済み明細だけを新しい順で返す。"""
+
+    table = _table("TRANSACTIONS_TABLE")
+    items: list[dict[str, Any]] = []
+    request: dict[str, Any] = {
+        "KeyConditionExpression": Key("user_id").eq(user_id),
+        "ScanIndexForward": False,
+        "Limit": MAX_TRANSACTIONS_PER_RESPONSE,
+    }
+    truncated = False
+    while len(items) < MAX_TRANSACTIONS_PER_RESPONSE:
+        request["Limit"] = MAX_TRANSACTIONS_PER_RESPONSE - len(items)
+        response = table.query(**request)
+        items.extend(
+            item for item in response.get("Items", []) if str(item.get("user_id", "")) == user_id
+        )
+        last_key = response.get("LastEvaluatedKey")
+        if not last_key:
+            break
+        if len(items) >= MAX_TRANSACTIONS_PER_RESPONSE:
+            truncated = True
+            break
+        request["ExclusiveStartKey"] = last_key
+
+    transactions = [
+        {
+            "date": str(item.get("transaction_date", "")),
+            "amount": int(item.get("amount", 0)),
+            "merchant": str(item.get("merchant", "詳細なし")),
+            "category": str(item.get("category", "その他")),
+            "source": str(item.get("source", "CARD")),
+        }
+        for item in items[:MAX_TRANSACTIONS_PER_RESPONSE]
+    ]
+    transactions.sort(key=lambda item: item["date"], reverse=True)
+    return {
+        "transactions": transactions,
+        "count": len(transactions),
+        "truncated": truncated,
+    }
+
+
+def validate_category_rule(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        raise ValueError("分類ルールの形式が不正です。")
+    rule_key = str(value.get("rule_key", "")).strip()
+    source = _transaction_source(value.get("source"))
+    category = _validated_text(value.get("category"), 40)
+    if not CATEGORY_RULE_KEY_PATTERN.fullmatch(rule_key):
+        raise ValueError("分類ルールの照合番号が不正です。")
+    if not rule_key.startswith(f"{source}#") or category not in ALLOWED_CATEGORIES:
+        raise ValueError("分類ルールの内容が不正です。")
+    return {"rule_key": rule_key, "source": source, "category": category}
+
+
+def save_category_rules(user_id: str, payload: dict[str, Any]) -> dict[str, int]:
+    raw_rules = payload.get("rules")
+    if not isinstance(raw_rules, list) or not 1 <= len(raw_rules) <= MAX_CATEGORY_RULES_PER_REQUEST:
+        raise ValueError("保存する分類ルールの件数が不正です。")
+    rules = [validate_category_rule(item) for item in raw_rules]
+    if len({item["rule_key"] for item in rules}) != len(rules):
+        raise ValueError("同じ分類ルールが重複しています。")
+
+    table = _table("CATEGORY_RULES_TABLE")
+    updated_at = datetime.now(timezone.utc).isoformat()
+    with table.batch_writer(overwrite_by_pkeys=["user_id", "rule_key"]) as batch:
+        for rule in rules:
+            batch.put_item(
+                Item={
+                    "user_id": user_id,
+                    "rule_key": rule["rule_key"],
+                    "source": rule["source"],
+                    "category": rule["category"],
+                    "updated_at": updated_at,
+                    "schema_version": 1,
+                }
+            )
+    return {"saved_rule_count": len(rules)}
+
+
+def list_category_rules(user_id: str) -> dict[str, Any]:
+    table = _table("CATEGORY_RULES_TABLE")
+    items: list[dict[str, Any]] = []
+    request: dict[str, Any] = {
+        "KeyConditionExpression": Key("user_id").eq(user_id),
+        "Limit": MAX_CATEGORY_RULES_PER_RESPONSE,
+    }
+    truncated = False
+    while len(items) < MAX_CATEGORY_RULES_PER_RESPONSE:
+        request["Limit"] = MAX_CATEGORY_RULES_PER_RESPONSE - len(items)
+        response = table.query(**request)
+        items.extend(item for item in response.get("Items", []) if str(item.get("user_id", "")) == user_id)
+        last_key = response.get("LastEvaluatedKey")
+        if not last_key:
+            break
+        if len(items) >= MAX_CATEGORY_RULES_PER_RESPONSE:
+            truncated = True
+            break
+        request["ExclusiveStartKey"] = last_key
+
+    rules = [
+        {
+            "rule_key": str(item.get("rule_key", "")),
+            "source": str(item.get("source", "CARD")),
+            "category": str(item.get("category", "その他")),
+        }
+        for item in items[:MAX_CATEGORY_RULES_PER_RESPONSE]
+        if CATEGORY_RULE_KEY_PATTERN.fullmatch(str(item.get("rule_key", "")))
+        and str(item.get("category", "")) in ALLOWED_CATEGORIES
+    ]
+    rules.sort(key=lambda item: item["rule_key"])
+    return {"rules": rules, "count": len(rules), "truncated": truncated}
 
 
 def build_group_comparison(month: str, source_type: str, excluded_user_id: str) -> dict[str, Any]:
@@ -488,6 +733,22 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
 
     if route_key == "GET /reports":
         return _response(200, {"reports": list_saved_reports(user_id)})
+
+    if route_key == "GET /transactions":
+        return _response(200, list_saved_transactions(user_id))
+
+    if route_key == "GET /category-rules":
+        return _response(200, list_category_rules(user_id))
+
+    if route_key == "PUT /category-rules":
+        payload = _parse_body(event)
+        if payload is None:
+            return _response(400, {"message": "送信データの形式が不正です。"})
+        try:
+            result = save_category_rules(user_id, payload)
+        except ValueError as error:
+            return _response(400, {"message": str(error)})
+        return _response(200, {**result, "message": "本人用の分類ルールを保存しました。"})
 
     if route_key == "GET /reports/{month}":
         month = str(event.get("pathParameters", {}).get("month", ""))

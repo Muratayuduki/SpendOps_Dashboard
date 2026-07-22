@@ -23,3 +23,20 @@ provider "aws" {
     )
   }
 }
+
+# CloudFrontへ設定するACM証明書はus-east-1で発行する必要がある
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = merge(
+      {
+        Project     = var.project_name
+        Environment = var.environment
+        ManagedBy   = "Terraform"
+      },
+      var.additional_tags
+    )
+  }
+}

@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" agent="Codex" modified="2026-07-08T00:00:00.000Z" version="24.7.17" type="device">
+<mxfile host="app.diagrams.net" agent="Codex" modified="2026-07-22T00:00:00.000Z" version="24.7.17" type="device">
   <diagram id="spendops-aws-icons" name="AWS Architecture">
     <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
       <root>
@@ -16,10 +16,10 @@
         <mxCell id="paypay" value="User A&lt;br&gt;PayPay CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DE350B;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="80" y="165" width="110" height="48" as="geometry" />
         </mxCell>
-        <mxCell id="bank" value="User B&lt;br&gt;Card CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0052CC;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="bank" value="User B&lt;br&gt;JCB CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0052CC;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="80" y="235" width="110" height="48" as="geometry" />
         </mxCell>
-        <mxCell id="jcb" value="User C&lt;br&gt;Bank CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00875A;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="jcb" value="User C&lt;br&gt;VISA CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00875A;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="80" y="305" width="110" height="48" as="geometry" />
         </mxCell>
         <mxCell id="csv" value="Uploaded CSV Files" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#FFFFFF;strokeColor=#36B37E;fontSize=13;fontStyle=1;" vertex="1" parent="1">
@@ -31,16 +31,16 @@
         <mxCell id="apigw" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DEEBFF;strokeColor=#0052CC;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="565" y="240" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="lambda-csv" value="Lambda CSV Normalize" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0B3;strokeColor=#FF991F;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="lambda-csv" value="Lambda Validate / Persist" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0B3;strokeColor=#FF991F;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="735" y="360" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="lambda-agg" value="Lambda User / Group Aggregation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0B3;strokeColor=#FF991F;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="lambda-agg" value="Same Lambda API&lt;br&gt;Reports / Comparison" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0B3;strokeColor=#FF991F;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="980" y="295" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="ddb" value="DynamoDB Transactions / User Summaries / Group Stats" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DEEBFF;strokeColor=#0052CC;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="ddb" value="DynamoDB Transactions / User Summaries / Import Batches" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DEEBFF;strokeColor=#0052CC;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="1200" y="270" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="eventbridge" value="EventBridge&lt;br&gt;Monthly Reaggregation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7E6;strokeColor=#FF991F;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="eventbridge" value="Out of Scope&lt;br&gt;Scheduled Jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;dashed=1;" vertex="1" parent="1">
           <mxGeometry x="565" y="645" width="80" height="100" as="geometry" />
         </mxCell>
         <mxCell id="lambda-cost" value="Out of Scope&lt;br&gt;AWS Cost Import" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;dashed=1;" vertex="1" parent="1">
@@ -49,7 +49,7 @@
         <mxCell id="cost" value="Cost Explorer API&lt;br&gt;Not Used in MVP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;dashed=1;" vertex="1" parent="1">
           <mxGeometry x="900" y="645" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="s3" value="S3 Static Web / Encrypted CSV Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3FCEF;strokeColor=#36B37E;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="s3" value="S3 Static Web Assets&lt;br&gt;No CSV Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3FCEF;strokeColor=#36B37E;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="735" y="505" width="80" height="100" as="geometry" />
         </mxCell>
         <mxCell id="cloudfront" value="CloudFront" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAE6FF;strokeColor=#6554C0;fontSize=13;fontStyle=1;" vertex="1" parent="1">
@@ -61,13 +61,13 @@
         <mxCell id="cloudwatch" value="CloudWatch Logs / Metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="1350" y="425" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="sns" value="SNS / SES Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="sns" value="Out of Scope&lt;br&gt;SNS / SES Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;dashed=1;" vertex="1" parent="1">
           <mxGeometry x="1200" y="645" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="kms" value="KMS&lt;br&gt;Encryption Keys" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="kms" value="AWS Managed&lt;br&gt;Encryption at Rest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F5F7;strokeColor=#6B778C;fontSize=13;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="1350" y="645" width="80" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="note2" value="CSV Upload / Import" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;fontColor=#00875A;" vertex="1" parent="1">
+        <mxCell id="note2" value="Normalized Transactions" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;fontColor=#00875A;" vertex="1" parent="1">
           <mxGeometry x="535" y="400" width="100" height="24" as="geometry" />
         </mxCell>
         <mxCell id="note3" value="Monthly Aggregation" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;fontColor=#FF8B00;" vertex="1" parent="1">

@@ -41,16 +41,9 @@ data "aws_iam_policy_document" "lambda_data_access" {
     resources = [
       aws_dynamodb_table.transactions.arn,
       aws_dynamodb_table.user_monthly_summaries.arn,
-      aws_dynamodb_table.group_monthly_stats.arn,
       aws_dynamodb_table.import_batches.arn,
+      aws_dynamodb_table.category_rules.arn,
     ]
-  }
-
-  statement {
-    sid       = "DeleteCognitoUser"
-    effect    = "Allow"
-    actions   = ["cognito-idp:AdminDeleteUser"]
-    resources = [aws_cognito_user_pool.main.arn]
   }
 }
 

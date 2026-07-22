@@ -6,10 +6,11 @@ resource "aws_apigatewayv2_api" "main" {
   cors_configuration {
     allow_credentials = false
     allow_headers     = ["authorization", "content-type"]
-    allow_methods     = ["GET", "POST", "DELETE", "OPTIONS"]
+    allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     allow_origins = distinct(concat(
       var.allowed_origins,
-      ["https://${aws_cloudfront_distribution.web.domain_name}"]
+      ["https://${aws_cloudfront_distribution.web.domain_name}"],
+      var.activate_custom_domain ? ["https://${var.custom_domain_name}"] : []
     ))
     max_age = 300
   }

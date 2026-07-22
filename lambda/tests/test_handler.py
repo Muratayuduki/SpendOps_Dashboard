@@ -23,6 +23,36 @@ def valid_summary(month="2026-06", source_type="PAYPAY", total=3000):
     }
 
 
+def valid_transactions(month="2026-06", source_type="PAYPAY", total=3000):
+    source = "PAYPAY" if source_type == "PAYPAY" else "JCB"
+    first_amount = total // 2
+    return [
+        {
+            "date": f"{month}-10",
+            "amount": first_amount,
+            "merchant": "テスト利用先A",
+            "category": "食費",
+            "source": source,
+            "occurrence": 0,
+        },
+        {
+            "date": f"{month}-11",
+            "amount": total - first_amount,
+            "merchant": "テスト利用先B",
+            "category": "食費",
+            "source": source,
+            "occurrence": 0,
+        },
+    ]
+
+
+def valid_payload(month="2026-06", source_type="PAYPAY", total=3000):
+    return {
+        "summaries": [valid_summary(month=month, source_type=source_type, total=total)],
+        "transactions": valid_transactions(month=month, source_type=source_type, total=total),
+    }
+
+
 def auth_event(route_key, body=None, month=None, source=None, groups=None):
     claims = {"sub": "user-current"}
     if groups is not None:
@@ -61,11 +91,21 @@ class FakeTable:
         return FakeBatchWriter(self)
 
     def put_item(self, Item):
-        keys = (Item.get("user_id"), Item.get("month") or Item.get("import_batch_id"))
+        keys = (
+            Item.get("user_id"),
+            Item.get("transaction_key") or Item.get("month") or Item.get("import_batch_id") or Item.get("rule_key"),
+        )
         self.items = [
             existing
             for existing in self.items
-            if (existing.get("user_id"), existing.get("month") or existing.get("import_batch_id")) != keys
+            if (
+                existing.get("user_id"),
+                existing.get("transaction_key")
+                or existing.get("month")
+                or existing.get("import_batch_id")
+                or existing.get("rule_key"),
+            )
+            != keys
         ]
         self.items.append(Item)
         return {}
@@ -105,12 +145,20 @@ class FakeTable:
 
 class HandlerTests(unittest.TestCase):
     def setUp(self):
+        self.transactions = FakeTable()
         self.summaries = FakeTable()
         self.batches = FakeTable()
+        self.category_rules = FakeTable()
+        tables = {
+            "TRANSACTIONS_TABLE": self.transactions,
+            "USER_MONTHLY_SUMMARIES_TABLE": self.summaries,
+            "IMPORT_BATCHES_TABLE": self.batches,
+            "CATEGORY_RULES_TABLE": self.category_rules,
+        }
         self.table_patch = patch.object(
             handler,
             "_table",
-            side_effect=lambda name: self.summaries if name == "USER_MONTHLY_SUMMARIES_TABLE" else self.batches,
+            side_effect=lambda name: tables[name],
         )
         self.table_patch.start()
 
@@ -148,27 +196,52 @@ class HandlerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             handler.validate_summary(summary)
 
-    def test_import_saves_only_monthly_aggregate_and_batch_metadata(self):
-        payload = {
-            "summaries": [{**valid_summary(), "merchant": "must-not-be-saved"}],
-            "validation": {"accepted_count": 2, "ignored_count": 1, "invalid_count": 0},
-        }
+    def test_online_purchase_category_is_accepted(self):
+        summary = valid_summary()
+        summary["categories"] = {"ネットでの購入": 3000}
+        transaction_list = valid_transactions()
+        for transaction in transaction_list:
+            transaction["category"] = "ネットでの購入"
+
+        self.assertEqual(handler.validate_summary(summary)["categories"], {"ネットでの購入": 3000})
+        self.assertTrue(all(handler.validate_transaction(item)["category"] == "ネットでの購入" for item in transaction_list))
+
+    def test_import_saves_normalized_transactions_without_raw_csv(self):
+        payload = valid_payload()
+        payload["filename"] = "must-not-be-saved.csv"
+        payload["raw_csv"] = "card-number-must-not-be-saved"
+        payload["validation"] = {"accepted_count": 2, "ignored_count": 1, "invalid_count": 0}
         response = handler.lambda_handler(auth_event("POST /imports", payload), None)
         body = json.loads(response["body"])
 
         self.assertEqual(response["statusCode"], 201)
+        self.assertEqual(body["saved_transaction_count"], 2)
         self.assertEqual(body["saved_summary_count"], 1)
-        stored = self.summaries.items[0]
+        stored = self.transactions.items[0]
         self.assertEqual(stored["user_id"], "user-current")
-        self.assertNotIn("merchant", stored)
+        self.assertEqual(stored["merchant"], "テスト利用先A")
+        self.assertTrue(stored["transaction_key"].startswith("2026-06-10#PAYPAY#"))
         self.assertNotIn("email", stored)
         self.assertNotIn("csv", json.dumps(stored, ensure_ascii=False).lower())
         self.assertEqual(self.batches.items[0]["consent_version"], "2026-07-15")
+        self.assertEqual(self.batches.items[0]["transaction_count"], 2)
+
+    def test_import_rejects_transactions_that_do_not_match_summary(self):
+        payload = valid_payload()
+        payload["transactions"][0]["amount"] = 1
+        with self.assertRaises(ValueError):
+            handler.save_analysis("user-current", payload)
+
+    def test_transaction_masks_long_sensitive_numbers_in_merchant(self):
+        transaction = valid_transactions()[0]
+        transaction["merchant"] = "利用先 1234567890123456"
+        normalized = handler.validate_transaction(transaction)
+        self.assertEqual(normalized["merchant"], "利用先 [redacted]")
 
     def test_import_replaces_same_user_month_and_source(self):
-        payload = {"summaries": [valid_summary(total=3000)]}
+        payload = valid_payload(total=3000)
         handler.save_analysis("user-current", payload)
-        handler.save_analysis("user-current", {"summaries": [valid_summary(total=4000)]})
+        handler.save_analysis("user-current", valid_payload(total=4000))
         self.assertEqual(len(self.summaries.items), 1)
         self.assertEqual(self.summaries.items[0]["total_expense"], 4000)
 
@@ -230,7 +303,7 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(comparison["participant_count"], 4)
 
     def test_saved_report_route_returns_own_summary_and_anonymous_comparison(self):
-        handler.save_analysis("user-current", {"summaries": [valid_summary()]})
+        handler.save_analysis("user-current", valid_payload())
         response = handler.lambda_handler(
             auth_event("GET /reports/{month}", month="2026-06", source="PAYPAY"), None
         )
@@ -247,7 +320,11 @@ class HandlerTests(unittest.TestCase):
                 "summaries": [
                     valid_summary(source_type="PAYPAY", total=3000),
                     valid_summary(source_type="CARD", total=7000),
-                ]
+                ],
+                "transactions": [
+                    *valid_transactions(source_type="PAYPAY", total=3000),
+                    *valid_transactions(source_type="CARD", total=7000),
+                ],
             },
         )
         response = handler.lambda_handler(
@@ -262,7 +339,7 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(body["report"]["payment_methods"]["JCB"]["amount"], 7000)
 
     def test_all_report_is_partial_when_current_user_has_only_one_source(self):
-        handler.save_analysis("user-current", {"summaries": [valid_summary()]})
+        handler.save_analysis("user-current", valid_payload())
         report = handler.get_saved_report("user-current", "2026-06", "ALL")
         self.assertIsNotNone(report)
         self.assertTrue(report["report"]["partial"])
@@ -296,12 +373,89 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(comparison["category_averages"]["食費"], 3000)
 
     def test_report_list_returns_only_current_user_items(self):
-        handler.save_analysis("user-current", {"summaries": [valid_summary()]})
+        handler.save_analysis("user-current", valid_payload())
         response = handler.lambda_handler(auth_event("GET /reports"), None)
         body = json.loads(response["body"])
         self.assertEqual(response["statusCode"], 200)
         self.assertEqual(len(body["reports"]), 1)
         self.assertNotIn("user_id", response["body"])
+
+    def test_transaction_list_returns_only_current_users_normalized_details(self):
+        handler.save_analysis("user-current", valid_payload())
+        self.transactions.items.append(
+            {
+                "user_id": "other-user",
+                "transaction_key": "2026-06-12#PAYPAY#other",
+                "transaction_date": "2026-06-12",
+                "amount": 9999,
+                "merchant": "他人の利用先",
+                "category": "その他",
+                "source": "PAYPAY",
+            }
+        )
+        response = handler.lambda_handler(auth_event("GET /transactions"), None)
+        body = json.loads(response["body"])
+
+        self.assertEqual(response["statusCode"], 200)
+        self.assertEqual(body["count"], 2)
+        self.assertFalse(body["truncated"])
+        self.assertEqual({item["merchant"] for item in body["transactions"]}, {"テスト利用先A", "テスト利用先B"})
+        self.assertNotIn("user_id", response["body"])
+        self.assertNotIn("transaction_key", response["body"])
+        self.assertNotIn("他人の利用先", response["body"])
+
+    def test_transaction_list_requires_login(self):
+        response = handler.lambda_handler(
+            {"requestContext": {"routeKey": "GET /transactions"}}, None
+        )
+        self.assertEqual(response["statusCode"], 401)
+
+    def test_category_rules_are_saved_and_returned_for_current_user_only(self):
+        rule = {
+            "rule_key": f"PAYPAY#{'a' * 64}",
+            "source": "PAYPAY",
+            "category": "食費",
+        }
+        saved_response = handler.lambda_handler(
+            auth_event("PUT /category-rules", {"rules": [rule]}), None
+        )
+        self.category_rules.items.append(
+            {
+                "user_id": "other-user",
+                "rule_key": f"PAYPAY#{'b' * 64}",
+                "source": "PAYPAY",
+                "category": "娯楽",
+            }
+        )
+        listed_response = handler.lambda_handler(auth_event("GET /category-rules"), None)
+        body = json.loads(listed_response["body"])
+
+        self.assertEqual(saved_response["statusCode"], 200)
+        self.assertEqual(json.loads(saved_response["body"])["saved_rule_count"], 1)
+        self.assertEqual(listed_response["statusCode"], 200)
+        self.assertEqual(body["count"], 1)
+        self.assertEqual(body["rules"], [rule])
+        self.assertNotIn("user_id", listed_response["body"])
+        self.assertNotIn("other-user", listed_response["body"])
+        self.assertNotIn("merchant", json.dumps(self.category_rules.items, ensure_ascii=False))
+
+    def test_category_rule_rejects_invalid_hash_or_category(self):
+        invalid_hash = {"rule_key": "PAYPAY#short", "source": "PAYPAY", "category": "食費"}
+        invalid_category = {
+            "rule_key": f"PAYPAY#{'c' * 64}",
+            "source": "PAYPAY",
+            "category": "自由入力",
+        }
+        with self.assertRaises(ValueError):
+            handler.save_category_rules("user-current", {"rules": [invalid_hash]})
+        with self.assertRaises(ValueError):
+            handler.save_category_rules("user-current", {"rules": [invalid_category]})
+
+    def test_category_rule_routes_require_login(self):
+        response = handler.lambda_handler(
+            {"requestContext": {"routeKey": "GET /category-rules"}}, None
+        )
+        self.assertEqual(response["statusCode"], 401)
 
     def test_admin_route_requires_admin_group(self):
         denied = handler.lambda_handler(auth_event("GET /admin/imports", groups="users"), None)
