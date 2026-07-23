@@ -1,5 +1,20 @@
 # `cache.yuduki0303.com` 公開設定手順書
 
+## 0. 現在の状態（2026-07-23）
+
+2026年7月23日にSpendOps DashboardのAWS基盤をTerraform Destroyで削除しました。CloudFront、ACM証明書、API、S3、Cognito、DynamoDBなどは削除済みで、Terraform stateは0件です。
+
+CloudflareのDNSレコードはTerraform管理外のため、今回のDestroyでは変更していません。
+
+- 証明書確認用の `_` から始まるCNAMEは、同じAWSアカウントで同じドメインのACM証明書を再作成するときに再利用できるため残す
+- 公開用の `cache` CNAMEが残っている場合、削除済みCloudFrontを参照しているため、停止中は無効化または削除する
+- 再構築時は、最初に `activate_custom_domain = false` でAWS基盤とACM証明書を作成する
+- `terraform output custom_domain_validation_records` とCloudflareの確認用CNAMEが一致することを確認し、ACM証明書の発行を待つ
+- 証明書発行後に `activate_custom_domain = true` でCloudFrontへ独自ドメインを接続する
+- `terraform output -raw cloudfront_domain_name` で新しいCloudFrontドメインを取得し、Cloudflareの公開用 `cache` CNAMEをその値へ更新する
+
+以下の手順と固定値は2026年7月22日の初回公開履歴です。再構築時は、必ず新しいTerraform outputを正として使用してください。
+
 ## 1. この手順で行うこと
 
 取得済みの `yuduki0303.com` に `cache` というサブドメインを追加し、SpendOps Dashboardを次のURLで開けるようにします。
