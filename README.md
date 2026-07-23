@@ -20,7 +20,7 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 | API・認証・DB | API Gateway、Lambda、Cognito、DynamoDBを削除済み |
 | Terraform state | 0エントリ。2026-07-23にローカルで再確認済み |
 | ローカル設定 | `app-site/config.js` は空設定。未ログインのローカル分析のみ利用可能 |
-| 自動テスト | フロントエンド45件、Lambda 24件、合計69件成功 |
+| 自動テスト | フロントエンド46件、Lambda 24件、合計70件成功 |
 | 直近の目標 | 2026-07-31までに仕上げ、2026-09-07の学校課題提出に備える |
 
 ## 解決する課題
@@ -227,7 +227,7 @@ node app-site/tests/generated-comparison.test.js
 node --check app-site/script.js
 ```
 
-2026-07-23の結果: 37件 + 3件 + 5件、合計45件成功。JavaScript構文確認も成功。
+2026-07-23の結果: 38件 + 3件 + 5件、合計46件成功。JavaScript構文確認も成功。
 
 ### Lambda
 
@@ -278,7 +278,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 管理者機能は取込バッチ総数の確認のみで、管理画面や詳細エラー確認は未実装
 - 比較用合成データは実統計ではなく、元データが少ないため参考値としての精度に限界がある
 - 収入、資産推移、予算管理は未実装
-- デザイン、情報密度、分類精度、テストデータ、提出資料の仕上げが残っている
+- デザイン、情報密度、分類精度、テストデータの仕上げと、作成済み展示資料のGoogle Drive取込が残っている
 - `drowio`、Notionローカル版、ビジュアルブリーフの一部にAWS削除前の記述があり、READMEとの同期が必要
 
 ## 完了条件
@@ -295,7 +295,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - [x] 保存済み明細から年間レポートと利用先絞り込みを復元できる
 - [x] 条件を満たす他ユーザーとの匿名比較を実装している
 - [x] CSV原本、未加工行、カード番号、口座番号、認証情報をAWSへ保存しない
-- [x] フロントエンド45件、Lambda 24件のテストが成功する
+- [x] フロントエンド46件、Lambda 24件のテストが成功する
 - [x] TerraformでAWS基盤を構築できる構成がある
 
 ### 仕上げ対象
@@ -303,7 +303,9 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - [ ] デザイン修正を完了する
 - [ ] 自動分類と表記揺れ対応の精度を強化する
 - [ ] README以外の構成図・Notion・企画資料を最新状態へ同期する
-- [ ] 発表スライド、デモ手順、説明の流れを作成する
+- [x] 約20分の自由閲覧向け展示スライドと、別紙の技術解説を作成する
+- [x] 展示資料PPTXをネイティブGoogle Slidesへ取り込み、実画面を反映する
+- [x] 技術解説DOCXをGoogle Docsへ取り込み、Google Slidesからのリンクを設定する
 - [ ] AWS再構築を行う場合は、承認後に公開E2Eを再確認する
 
 ## 関連資料
@@ -318,6 +320,8 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 | [`drowio/spendops_aws_architecture.drawio`](drowio/spendops_aws_architecture.drawio) | AWS構成図 | 分類ルールDBと削除後状態の同期が必要 |
 | [`notion/spendops_dashboard_notion_plan_with_gantt.md`](notion/spendops_dashboard_notion_plan_with_gantt.md) | 7月完成計画 | 一部のAWS削除記録が旧状態 |
 | [`docs/app_visual_brief.md`](docs/app_visual_brief.md) | ロゴ・画像・発表資料用ブリーフ | 公開継続の記述が削除前状態 |
+| [`outputs/SpendOps_Dashboard_展示資料.pptx`](outputs/SpendOps_Dashboard_展示資料.pptx) | 12枚・約20分の自由閲覧向け展示資料 | Google Slidesへ取込済み。5枚目の実画面はGoogle Slides版に反映 |
+| [`outputs/SpendOps_Dashboard_技術解説.docx`](outputs/SpendOps_Dashboard_技術解説.docx) | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
 
 詳細な日別作業ログはREADMEへ重複させず、`docs/codex_handoff.md`で管理します。
 
@@ -327,6 +331,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 2026-07-15: CSV分析、Cognito認証、DynamoDB月別保存、匿名比較、全支払い統合を実装・公開
 - 2026-07-22: 個別取引保存、年間集計、利用先絞り込み、分類修正、本人別分類学習を実装・公開
 - 2026-07-23: ユーザー承認後にAWS基盤42リソースを削除し、匿名化済み月別集計だけを長期バックアップ
+- 2026-07-23: 展示会形式の約20分自由閲覧を想定した12枚の本編PPTXと、技術解説DOCXを作成。PowerPoint実描画、Open XML構造、70件の自動テストを再確認
 
 ## 既存の利用者フィードバック
 
@@ -337,10 +342,11 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - ~~比較平均がダミーデータだし月ごとで平均を出しているから全データを比較してその平均で出したいそれかダミーデータの内容にもっと差を出したい今現在私の支払いの差が大きすぎて参考にならない~~
 - ~~googleでの支払いは娯楽に分類~~
 - ~~支払い方法で未登録のものが出てきたときにすべてその他で分類してしまうので正確な結果が出ない~~
-- ある程度はサイト側で分類しどうしても不明なものだけより細かく分析したい人だけ分類できるようにしたい以降その人が設定した項目にそれが振り分けられるようにしたい
+- ~~ある程度はサイト側で分類しどうしても不明なものだけより細かく分析したい人だけ分類できるようにしたい以降その人が設定した項目にそれが振り分けられるようにしたい~~
 - ~~DBに保存していないからか支払い方法が読み込んだファイルのみなので今のところ意味がない~~
 - ~~分析がしょぼい~~
 - ~~テストデータが薄い~~
+- 分析内容が事実の列挙なので必要性が薄い
 
 ## 残り作業
 
@@ -354,4 +360,4 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 
 ### デザインの改修
 
-- アイコンの追加
+- ~~アイコンの追加~~

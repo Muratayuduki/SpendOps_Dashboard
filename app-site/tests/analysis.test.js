@@ -45,6 +45,18 @@ global.window = {
 
 const core = require("../script.js");
 
+test("app icon is available to the browser tab and header", () => {
+  const appDirectory = path.resolve(__dirname, "..");
+  const html = fs.readFileSync(path.join(appDirectory, "index.html"), "utf8");
+  const iconPath = path.join(appDirectory, "icon.png");
+
+  assert.match(html, /<link rel="icon" type="image\/png" href="\.\/icon\.png" \/>/);
+  assert.match(html, /<link rel="apple-touch-icon" href="\.\/icon\.png" \/>/);
+  assert.match(html, /<img class="brand-mark" src="\.\/icon\.png"/);
+  assert.equal(fs.existsSync(iconPath), true);
+  assert.ok(fs.statSync(iconPath).size > 0);
+});
+
 test("CSV parser supports quoted commas and line breaks", () => {
   const rows = core.parseCsv('date,merchant,amount\r\n2026/06/01,"A, B",100\r\n');
   assert.deepEqual(rows[1], ["2026/06/01", "A, B", "100"]);

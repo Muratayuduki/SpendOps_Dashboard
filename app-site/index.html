@@ -6,6 +6,8 @@
     <meta name="description" content="PayPayやカードの利用明細から支出を分かりやすく振り返るSpendOps Dashboard" />
     <meta name="theme-color" content="#101713" />
     <title>SpendOps Dashboard</title>
+    <link rel="icon" type="image/png" href="./icon.png" />
+    <link rel="apple-touch-icon" href="./icon.png" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./config.js"></script>
     <script src="./comparison-data.js"></script>
@@ -15,7 +17,7 @@
   <body>
     <header class="topbar">
       <div class="brand-area">
-        <div class="brand"><span class="brand-mark">S/</span><strong>SpendOps</strong></div>
+        <div class="brand"><img class="brand-mark" src="./icon.png" alt="" width="32" height="32" /><strong>SpendOps</strong></div>
         <button class="menu-button" id="data-menu-toggle" type="button" aria-controls="control-panel" aria-expanded="false">
           <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
           <span id="data-menu-label">明細を読み込む</span>

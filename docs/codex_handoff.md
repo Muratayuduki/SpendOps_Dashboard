@@ -37,6 +37,7 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 - AWS Cost ExplorerによるAWS料金取得は初期版から削除する。複数人の収支CSV比較分析に集中する
 - AWS基盤はTerraformで管理する。2026-07-22に再構築した基盤は、Planとユーザー承認を経て2026-07-23に全削除した。今後の再構築・変更・デプロイもPlan確認とユーザー承認後に行う
 - 2026-07-23時点でTerraform stateは0件。ローカルのコード、資料、Terraform定義、draw.ioは保持している
+- 約20分の自由閲覧向け展示資料を `outputs/SpendOps_Dashboard_展示資料.pptx`、技術別紙を `outputs/SpendOps_Dashboard_技術解説.docx` として作成済み。展示資料はネイティブGoogle Slidesへ取込済みで、2・5・6枚目に `photo/S_2.png`、`photo/S_5.png`、`photo/S_6.png` の実画面を反映した。技術別紙もGoogle Docsへ取込済みで、Google Slides最終ページからリンクしている
 
 ## 現在の停止位置（2026-07-23 AWS基盤削除後）
 
@@ -57,7 +58,7 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 - Terraform stateは47エントリ。DynamoDB、Cognito、S3、Lambda、API Gateway、CloudFront、ACM、CloudWatch Logs、IAMを構築済み
 - 1画面UI、PayPay／JCB／VISA分析、Cognito認証、DynamoDB保存、実ユーザー匿名比較、全支払い統合、詳細分析コメント、完全な円表記、手動カテゴリ編集を公開済み
 - 正規化済み個別取引の保存処理をフロントとLambdaへ追加。Terraformはtransactions、user_monthly_summaries、import_batchesの3テーブル構成とし、Cognito・DynamoDBの削除保護を有効化
-- フロントエンド45件、Lambda 24件の合計69テスト成功
+- フロントエンド46件、Lambda 24件の合計70テスト成功
 - 比較切替の説明・アニメーション、棒グラフの横線、黄緑系への配色統一、読み込み欄の開閉、支払い方法表示の削除、行動提案型コメント、初心者向け文言、全期間集計、利用店絞り込みを公開済み
 - 画面更新のTerraform Applyは0件追加、4件変更、0件削除。CloudFrontキャッシュ無効化、公開4資産の反映、ヘルスAPIのHTTP 200、公開後の再Plan差分なしを確認済み
 - 全期間・年間表示は今回読み込んだ明細と保存済み明細の両方に対応。本人専用 `GET /transactions` で最大5,000件を再取得し、再読み込み後もPayPay・カード統合と利用店絞り込みを復元する
@@ -124,6 +125,10 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 - 2026-07-23: 最新Destroy Planの追加0、変更0、削除42と全件が削除操作であることを確認し、ユーザー承認後に適用。Terraform state 0件と、AWS主要9分類の対象リソース残存0件を確認。今回のDynamoDBシステムバックアップ4件は `AVAILABLE` で、2026年8月27日まで保持される。Cloudflare DNSとローカル成果物は変更していない。
 - 2026-07-23: ユーザー情報を残さず比較データだけを保持する方針を確定。月別集計60件を一時復元し、元CognitoユーザーIDを対応表を残さないランダムIDへ置換。匿名参加者3人、集計総額一致、想定外属性0件を確認し、オンデマンドバックアップ `spendops-anonymized-comparison-20260723` を作成した。一時テーブル2件は削除済み。
 - 2026-07-23: 未匿名システムバックアップ8件の早期削除を試みたが、AWSがシステムバックアップの手動削除を拒否。過去分4件は2026年8月19日、今回分4件は2026年8月27日に自動失効する。匿名化オンデマンドバックアップ1件だけを長期保持する。
+- 2026-07-23: 新しいアプリアイコンをWeb資産へ追加。ブラウザのfavicon、Apple Touch Icon、ヘッダーのブランドマークへ反映し、TerraformのS3配信対象と参照切れテストも追加した。フロントエンド46件、Lambda 24件の合計70件、JavaScript構文、Terraform整形・構成検証が成功した。
+- 2026-07-23: ランダムな10人が約20分で自由閲覧する展示形式を想定し、本編12枚の `outputs/SpendOps_Dashboard_展示資料.pptx` と、セキュリティ・個人情報保護・技術選定・制約を分離した `outputs/SpendOps_Dashboard_技術解説.docx` を作成。PPTXはPowerPointで12枚をPNGへ実描画して全ページを目視確認し、PPTX 58 XML部品・DOCX 9 XML部品の不正0件、フロント46件・Lambda 24件の合計70件成功を再確認した。Google Drive連携が現在のセッションにないため、ネイティブ取込と技術資料URLへの差し替えは次回作業とする。
+- 2026-07-23: 展示資料PPTXをネイティブGoogle Slidesへ取り込み、全12枚を確認。5枚目「読み方」の擬似UIを `photo/img.png` の実画面へ置き換え、更新後の全12枚を1600×900で再描画して重なり・欠けがないことを目視確認した。Google Slides: https://docs.google.com/presentation/d/1dLuDz0po8TevuVGNh3AkZN7q5vOh5dJcy9egA1_cPPM
+- 2026-07-23: `photo/S_2.png`、`photo/S_5.png`、`photo/S_6.png` をGoogle Slidesの2・5・6枚目へ反映。技術解説DOCXをネイティブGoogle Docsへ取り込み、12枚目の無効なローカルファイルリンクをGoogle Docs URLへ置換した。更新後の全12枚を1600×900で再描画し、重なり・欠けがないことを目視確認した。Google Docs: https://docs.google.com/document/d/1BXnVu_XaYEiMqYG8pmUy0HvkbhnoSvmSMOo2H1YOwEY
 
 ## 2026-07-08 要件整理履歴
 
@@ -215,13 +220,15 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 | `docs/custom_domain_cloudflare_setup.md` | 独自サブドメイン設定手順書 | `cache.yuduki0303.com` のCloudflare DNS操作と二段階公開手順 |
 | `README.md` | プロジェクト概要、公開状態、2026-07-15実装履歴、次回作業 | 2026-07-15の作業ログを統合済み |
 | `AGENTS.md` | Codexのリポジトリ作業ルール | 作業開始時に読むファイルを定義 |
+| `outputs/SpendOps_Dashboard_展示資料.pptx` | 12枚・約20分の自由閲覧向け本編 | Google Slidesへ取込済み。2・5・6枚目の実画面はGoogle Slides版に反映 |
+| `outputs/SpendOps_Dashboard_技術解説.docx` | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
 
 ## 次回以降の優先作業
 
 1. デザインを修正し、配色、余白、ボタン、情報密度、可読性を整える
 2. 自動分類と表記ゆれ対応を改善し、分類精度を強化する
 3. README、構成図、Notion、企画・要件資料を最新状態へ同期する
-4. 発表スライド、デモ手順、説明の流れを作成する
+4. Google Slides / Google Docsの共有範囲を提出方法に合わせて最終確認する
 
 銀行対応は行わない。主機能の追加開発よりも、上記4項目の完成を優先する。
 

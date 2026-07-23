@@ -36,7 +36,7 @@ button { cursor: pointer; }
 .brand-area, .brand, .topbar-actions, .connection { display: flex; align-items: center; }
 .brand-area { gap: 18px; }
 .brand { gap: 10px; font-size: 13px; }
-.brand-mark { display: grid; width: 32px; height: 32px; place-items: center; color: var(--ink); background: var(--lime); border-radius: 9px; font-size: 11px; font-weight: 900; }
+.brand-mark { display: block; width: 32px; height: 32px; object-fit: cover; background: white; border-radius: 9px; }
 .topbar-actions { gap: 10px; }
 .connection { gap: 7px; font-size: 10px; color: rgba(255,255,255,.72); }
 .connection i { width: 7px; height: 7px; border-radius: 50%; background: #dca63a; }

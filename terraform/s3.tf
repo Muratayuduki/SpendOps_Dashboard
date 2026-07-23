@@ -25,6 +25,11 @@ locals {
       content_type  = "application/javascript; charset=utf-8"
       cache_control = "no-cache"
     }
+    "icon.png" = {
+      source        = "${path.module}/../app-site/icon.png"
+      content_type  = "image/png"
+      cache_control = "public, max-age=86400"
+    }
   }
 
   web_config = <<-EOT
