@@ -1,0 +1,7 @@
+interface:
+  display_name: "日報作成"
+  short_description: "当日の実績、残課題、次の開発工程を簡潔なプロジェクト日報に整理します"
+  default_prompt: "Use $write-daily-report to create today's concise development report in Japanese."
+
+policy:
+  allow_implicit_invocation: true
