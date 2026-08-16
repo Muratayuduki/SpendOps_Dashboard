@@ -1,5 +1,5 @@
 ﻿param(
-  [string]$OutputPath = (Join-Path (Get-Location) 'outputs\SpendOps_Dashboard_技術解説.docx')
+  [string]$OutputPath = (Join-Path (Get-Location) 'materials\deliverables\SpendOps_Dashboard_技術解説.docx')
 )
 
 Set-StrictMode -Version Latest
@@ -297,10 +297,10 @@ $body.Add((New-PageBreak))
 $body.Add((New-Paragraph -Text '参考資料' -Style 'Heading1' -KeepNext $true))
 $body.Add((New-Paragraph -Text 'プロジェクト内資料' -Style 'Heading2' -KeepNext $true))
 $body.Add((New-ListParagraph -Text 'README.md - 最新仕様、公開停止状態、テスト結果、制約' -NumId 1))
-$body.Add((New-ListParagraph -Text 'docs/system_prompt_guardrails_v2.md - セキュリティと作業ガードレール' -NumId 1))
-$body.Add((New-ListParagraph -Text 'docs/codex_handoff.md - 実装・検証・削除・匿名バックアップの履歴' -NumId 1))
-$body.Add((New-ListParagraph -Text 'terraform/*.tf - Cognito、API Gateway、Lambda、DynamoDB、S3、CloudFrontの定義' -NumId 1))
-$body.Add((New-ListParagraph -Text 'app-site/*.js、lambda/src/handler.py - CSV処理、認証補助、保存・比較ロジック' -NumId 1))
+$body.Add((New-ListParagraph -Text 'project-guidance/system_prompt_guardrails_v2.md - セキュリティと作業ガードレール' -NumId 1))
+$body.Add((New-ListParagraph -Text 'project-guidance/codex_handoff.md - 実装・検証・削除・匿名バックアップの履歴' -NumId 1))
+$body.Add((New-ListParagraph -Text 'implementation/terraform/*.tf - Cognito、API Gateway、Lambda、DynamoDB、S3、CloudFrontの定義' -NumId 1))
+$body.Add((New-ListParagraph -Text 'implementation/app-site/*.js、implementation/lambda/src/handler.py - CSV処理、認証補助、保存・比較ロジック' -NumId 1))
 
 $body.Add((New-Paragraph -Text '公式資料' -Style 'Heading2' -KeepNext $true))
 $body.Add((New-HyperlinkParagraph -Label 'Amazon API Gateway' -Description 'APIの作成、公開、保守、監視、保護' -RelationshipId 'rId10'))

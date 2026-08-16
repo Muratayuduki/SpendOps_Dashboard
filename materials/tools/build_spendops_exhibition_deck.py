@@ -11,9 +11,9 @@ from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "outputs" / "SpendOps_Dashboard_展示資料.pptx"
-ICON = ROOT / "icon" / "icon.png"
+ROOT = Path(__file__).resolve().parents[2]
+OUTPUT = ROOT / "materials" / "deliverables" / "SpendOps_Dashboard_展示資料.pptx"
+ICON = ROOT / "materials" / "images" / "icon" / "icon.png"
 TECH_DOC_LINK = "SpendOps_Dashboard_技術解説.docx"
 
 W = 13.333

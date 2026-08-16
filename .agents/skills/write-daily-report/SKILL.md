@@ -8,8 +8,8 @@ description: 当日の開発作業を約3行で簡潔に要約し、残ってい
 ## 根拠を確認する
 
 1. 日付をAsia/Tokyo基準で確認する。
-2. `README.md`、`docs/system_prompt_guardrails_v2.md`、`docs/codex_handoff.md`を最後まで読む。最新仕様と現在状態は`README.md`を正本とする。
-3. 当日の会話、変更ファイル、`git status --short`、`git diff --stat`、実行済みテスト、同日付の引継ぎ記録から実績を確認する。
+2. `project-guidance/current-context.md`、`project-guidance/active-guardrails.md`、`project-guidance/current-handoff.md`を読む。README.mdは日報に関係する見出しだけを検索し、最新仕様と現在状態の正本とする。
+3. 当日の会話、変更ファイル、`git status --short`、`git diff --stat`、実行済みテストを確認する。保存済み日報との重複確認が必要な場合だけ、当日の日付を`project-guidance/history/`から検索する。
 4. 確認できた事実だけを「今日行ったこと」に記載する。未検証の作業を完了扱いにしない。
 5. 既存資料がREADMEと競合する場合はREADMEを優先し、必要なら不一致を課題として示す。
 
@@ -48,8 +48,7 @@ description: 当日の開発作業を約3行で簡潔に要約し、残ってい
 ## 保存を扱う
 
 - ユーザーが日報の作成・表示だけを求めた場合は、Markdownを回答し、ファイルを変更しない。
-- ユーザーが「保存」「記録」「追記」まで明示した場合は、`docs/codex_handoff.md`の同一日付節へ内容を統合する。
+- ユーザーが「保存」「記録」「追記」まで明示した場合は、`project-guidance/history/YYYY-MM.md`の同一日付節へ内容を統合し、現在状態が変わった項目だけ`project-guidance/current-handoff.md`へ反映する。
 - 同じ日付の節がある場合は新しい節を増やさず、重複する内容をまとめる。
 - READMEへ日次の詳細を重複記録しない。
 - 仕様変更の確定記録が必要な場合は`daily_spec_logger`へ引き継ぎ、日報の要約と仕様変更履歴を混同しない。
-

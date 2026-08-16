@@ -1,5 +1,5 @@
-param(
-  [string]$OutputPath = (Join-Path (Get-Location) 'SpendOps_Dashboard_企画書_更新版.docx')
+﻿param(
+  [string]$OutputPath = (Join-Path (Get-Location) 'materials\deliverables\proposals\SpendOps_Dashboard_企画書.docx')
 )
 
 Set-StrictMode -Version Latest
@@ -165,51 +165,50 @@ $body = [System.Collections.Generic.List[string]]::new()
 # Page 1: basic information, current problem, and proposal.
 $body.Add((New-Paragraph -Text '個人開発企画書 / PROPOSAL' -Style 'Kicker' -Align 'center'))
 $body.Add((New-Paragraph -Text 'SpendOps Dashboard' -Style 'ProposalTitle' -Align 'center'))
-$body.Add((New-Paragraph -Text '複数の決済CSVを月別にまとめ、自分の過去や匿名集計と比較するWebアプリ' -Style 'ProposalSubtitle' -Align 'center'))
+$body.Add((New-Paragraph -Text '複数人の支出CSVを匿名化・正規化し、全体平均との差を比較するWebアプリ' -Style 'ProposalSubtitle' -Align 'center'))
 
 $metadataRows = @(
-  @('更新日', '2026年7月29日', '状態', '実装済み／AWS基盤停止中'),
+  @('作成日', '2026年7月15日', '状態', '企画・設計／UIプロトタイプ'),
   @('作成者', '個人開発者', '開発形態', '個人開発・学校課題')
 )
 $body.Add((New-Table -Rows $metadataRows -Widths @(1000, 3680, 1000, 3680) -HeaderRow $false -BorderColor 'DADFE5'))
 $body.Add((New-Paragraph -Text '' -Style 'Spacer'))
 
 $body.Add((New-Paragraph -Text '企画要旨' -Style 'Heading1'))
-$body.Add((New-Paragraph -Text 'PayPay・JCB・三井住友VISAの利用明細CSVをブラウザ内で共通形式へ変換し、月別・年間・全期間の支出を一つの画面で確認する。本人の過去や条件を満たす匿名集計との比較から、次に見直す支出を見つけることを目的とする。' -Style 'Callout'))
+$body.Add((New-Paragraph -Text 'PayPay・JCB・三井住友VISAのCSVを共通形式へ変換し、本人の月次支出を匿名化された全体平均と比較できるサービスを企画する。目的は他人の明細を見ることではなく、自分の支出傾向を客観的に把握できるようにすることである。' -Style 'Callout'))
 
 $body.Add((New-Paragraph -Text '1. 現状・問題・課題' -Style 'Heading1'))
 $body.Add((New-ListParagraph -Text '支出履歴が決済サービスごとに分かれ、月全体の傾向を把握しにくい。' -NumId 1))
 $body.Add((New-ListParagraph -Text 'CSVごとに文字コード、ヘッダー位置、列構成が異なり、そのままでは比較できない。' -NumId 1))
-$body.Add((New-ListParagraph -Text '自分の支出が多いか少ないかを判断する比較軸がなく、他人の生明細を共有する方法にはプライバシー上の問題がある。' -NumId 1))
-$body.Add((New-ListParagraph -Text '毎日の手入力は負担が大きいため、任意のタイミングでCSVを読み込み、その日までを振り返れる方法が必要である。' -NumId 1))
+$body.Add((New-ListParagraph -Text '自分の支出が多いか少ないかを判断する比較軸がなく、明細共有にはプライバシー上の問題がある。' -NumId 1))
 
 $body.Add((New-Paragraph -Text '2. 提案' -Style 'Heading1'))
 $body.Add((New-RichParagraph -Style 'Normal' -Runs @(
   @{ Text = '提案内容：'; Bold = $true; Italic = $false; Color = ''; Size = 0 },
-  @{ Text = '利用者がCSVを任意に選択すると、ブラウザが形式判定・正規化・集計を行う。本人には明細とレポートを表示し、他者比較には生明細ではなく、本人を除く集計値だけを用いる。'; Bold = $false; Italic = $false; Color = ''; Size = 0 }
+  @{ Text = '利用者がCSVを任意にアップロードし、システムが形式判定・正規化・月次集計を行う。本人には自分の明細と集計を表示し、比較には個人を特定できない全体集計だけを用いる。'; Bold = $false; Italic = $false; Color = ''; Size = 0 }
 )))
 $body.Add((New-RichParagraph -Style 'Normal' -Runs @(
   @{ Text = '対象者：'; Bold = $true; Italic = $false; Color = ''; Size = 0 },
-  @{ Text = 'PayPayや複数のクレジットカードを利用し、手入力を続けずに月ごとの支出を振り返りたい利用者。'; Bold = $false; Italic = $false; Color = ''; Size = 0 }
+  @{ Text = '複数の決済サービスを利用し、自分の支出を集団平均との差で把握したい利用者。'; Bold = $false; Italic = $false; Color = ''; Size = 0 }
 )))
 $body.Add((New-RichParagraph -Style 'Normal' -Runs @(
   @{ Text = '提供価値：'; Bold = $true; Italic = $false; Color = ''; Size = 0 },
-  @{ Text = '異なるCSVを一つの見方へ揃え、総額・前月比・カテゴリ・推移・明細を月別中心で確認し、分類修正を次回取込へ反映できる。'; Bold = $false; Italic = $false; Color = ''; Size = 0 }
+  @{ Text = '「異なるCSVを揃える」「明細を見せずに比べる」「一部エラーでも分析を止めない」の3点を重視する。'; Bold = $false; Italic = $false; Color = ''; Size = 0 }
 )))
 
 $body.Add((New-Paragraph -Text '3. 開発方針' -Style 'Heading1'))
-$body.Add((New-Paragraph -Text '対象はPayPay・JCB・三井住友VISAの支出分析に限定する。銀行CSV、収入・資産推移、予算管理、AWS料金分析は今回の対象外とし、完全自動化よりも、対応した3形式を安全に読み込み月別レポートへつなげることを優先する。' -Style 'Normal'))
+$body.Add((New-Paragraph -Text '最初から機能を広げず、PayPay・JCB・三井住友VISAの取込、月次集計、匿名比較、取込エラー確認までをMVPとする。完全自動化よりも、CSVから正確なデータを取得できることを優先する。' -Style 'Normal'))
 
 $body.Add((New-PageBreak))
 
-# Page 2: implemented scope and technical decisions.
-$body.Add((New-Paragraph -Text '4. 実装内容と対応範囲' -Style 'Heading1'))
-$body.Add((New-ListParagraph -Text 'PayPay・JCB・三井住友VISAのCSVをブラウザ内で解析し、共通形式へ正規化する。' -NumId 2))
-$body.Add((New-ListParagraph -Text '月別、直近12か月、読み込んだ全期間の支出総額・件数・前月比・カテゴリ・推移を表示する。' -NumId 2))
-$body.Add((New-ListParagraph -Text 'PayPayとカードを統合し、「全支払い」「PayPayだけ」「カードだけ」を切り替える。' -NumId 2))
-$body.Add((New-ListParagraph -Text '明細を絞り込み、利用先ごとのカテゴリ修正と本人別の分類学習を行う。' -NumId 2))
-$body.Add((New-ListParagraph -Text 'Cognito認証、JWT認可、DynamoDB保存、匿名比較を実装する。現在のAWS基盤は停止中である。' -NumId 2))
-$body.Add((New-ListParagraph -Text '実ユーザー比較は本人を除く他5人以上の完全月だけを使い、不足時は合成参考値と明記する。' -NumId 2))
+# Page 2: minimum viable scope and technical decisions.
+$body.Add((New-Paragraph -Text '4. 企画内容（MVPで実装する最低限）' -Style 'Heading1'))
+$body.Add((New-ListParagraph -Text 'Cognitoでログインし、一般ユーザーと管理者を分ける。' -NumId 2))
+$body.Add((New-ListParagraph -Text 'PayPay・JCB・三井住友VISAのCSVをアップロードする。' -NumId 2))
+$body.Add((New-ListParagraph -Text 'CSV形式を判定し、日付・金額・支出先・カテゴリなどを共通形式へ正規化する。' -NumId 2))
+$body.Add((New-ListParagraph -Text '本人の月間支出、カテゴリ別支出、支払い方法別支出、取引件数、前月比を集計する。' -NumId 2))
+$body.Add((New-ListParagraph -Text '本人の集計結果と、匿名化された全体平均との差を表示する。' -NumId 2))
+$body.Add((New-ListParagraph -Text '管理者には全体集計、取込状況、エラー件数・失敗行だけを表示する。' -NumId 2))
 
 $body.Add((New-Paragraph -Text '対応CSVと取込上の違い' -Style 'Heading2'))
 $csvRows = @(
@@ -220,43 +219,24 @@ $csvRows = @(
 )
 $body.Add((New-Table -Rows $csvRows -Widths @(1800, 1600, 5960) -HeaderRow $true))
 
-$body.Add((New-Paragraph -Text '5. データを守るための設計' -Style 'Heading1'))
-$body.Add((New-ListParagraph -Text '端末内処理：CSV原本、ファイル名、未加工行はAWSへ送信・保存しない。' -NumId 1 -BoldLead $true))
-$body.Add((New-ListParagraph -Text '本人別保存：認証後は正規化済み取引、月別集計、取込履歴、分類ルールを本人IDで分離する。' -NumId 1 -BoldLead $true))
-$body.Add((New-ListParagraph -Text '比較の制限：他人の生明細を表示せず、人数条件と完全月条件を満たす集計だけを使う。' -NumId 1 -BoldLead $true))
+$body.Add((New-Paragraph -Text '5. 工夫した点' -Style 'Heading1'))
+$body.Add((New-ListParagraph -Text 'CSV正規化：文字コードやヘッダー位置の違いを吸収し、同じ項目で集計する。' -NumId 1 -BoldLead $true))
+$body.Add((New-ListParagraph -Text 'プライバシー設計：原本CSVを保存せず、氏名やカード番号を除外する。比較には匿名集計だけを使い、管理者にも生明細を見せない。' -NumId 1 -BoldLead $true))
+$body.Add((New-ListParagraph -Text '部分取込：問題のある行だけを除外し、失敗行番号と理由を示したうえで残りを集計する。' -NumId 1 -BoldLead $true))
 
 $body.Add((New-Paragraph -Text '6. システム構成' -Style 'Heading1'))
-$body.Add((New-Paragraph -Text 'CSV → ブラウザ（解析・正規化・表示）→ Cognito認証 → API Gateway → Lambda（検証・保存・比較）→ DynamoDB 4テーブル' -Style 'Callout'))
-$body.Add((New-Paragraph -Text '静的Web資産は非公開S3からCloudFront OAC経由で配信する。AWSは認証、権限制御、保存、比較、監視の実行基盤として実装済みである。Terraformによる構築・再構築手順の詳細は技術補足資料に分離する。' -Style 'Normal'))
+$body.Add((New-Paragraph -Text 'Web画面 → Cognito認証 → API Gateway → Lambda（検証・正規化・集計）→ DynamoDB（正規化済み取引・個人集計・匿名集計）→ 月別比較レポート' -Style 'Callout'))
+$body.Add((New-Paragraph -Text 'AWSは認証、権限制御、保存、集計、監視、暗号化の実行基盤として利用する。CloudWatch LogsにはCSV全文や個人情報を出力しない。' -Style 'Normal'))
 
-$body.Add((New-PageBreak))
+$body.Add((New-Paragraph -Text '7. できたら追加する内容' -Style 'Heading1'))
+$body.Add((New-Paragraph -Text '銀行CSVへの対応、全支出を統合した比較、中央値・分位表示、分析コメントの高度化は、MVP完成後に余裕がある場合のみ行う。AWS Cost Explorer連携とTerraformは初期版の対象外とする。' -Style 'Normal'))
 
-# Page 3: current state, evidence, limits, and submission plan.
-$body.Add((New-Paragraph -Text '7. 現在の状態と検証根拠' -Style 'Heading1'))
-$statusRows = @(
-  @('区分', '現在状態'),
-  @('実装済み', '3種CSV解析、月別・年間・全期間レポート、認証、保存、匿名比較、分類学習'),
-  @('AWS基盤', '2026年7月23日のTerraform Destroy後。公開サイト、ログイン、API、クラウド保存は停止中'),
-  @('ローカル利用', '未ログインでのCSV解析と画面表示を確認可能'),
-  @('自動テスト', 'フロントエンド46件、Lambda 24件、合計70件成功'),
-  @('提出時予定', '分析対象本人を含まないPayPay実データ5人分を用意し、実比較条件を満たす'),
-  @('データ制約', 'JCB・VISAは同数の実データ確保が難しく、実比較を保証しない')
-)
-$body.Add((New-Table -Rows $statusRows -Widths @(2100, 7260) -HeaderRow $true))
+$body.Add((New-Paragraph -Text '8. 完成条件' -Style 'Heading1'))
+$body.Add((New-ListParagraph -Text '3種類のCSVを取り込み、正規化済みデータを保存できる。' -NumId 1))
+$body.Add((New-ListParagraph -Text '本人の月別レポートと匿名化された全体平均との差を表示できる。' -NumId 1))
+$body.Add((New-ListParagraph -Text '他人の生明細、CSV原本、氏名、カード番号を保存・表示しない。' -NumId 1))
 
-$body.Add((New-Paragraph -Text '8. 既知の制約' -Style 'Heading1'))
-$body.Add((New-ListParagraph -Text '銀行CSVは今回の設計・実装対象外である。' -NumId 1))
-$body.Add((New-ListParagraph -Text '返金・取消の表現と、PayPayチャージなど取得元をまたぐ二重計上は追加検証が必要である。' -NumId 1))
-$body.Add((New-ListParagraph -Text '取得元ごとの最終取込日・未取込警告、失敗行番号と行別理由は画面未実装である。' -NumId 1))
-$body.Add((New-ListParagraph -Text '退会APIは誤操作防止のためHTTP 501で無効化している。' -NumId 1))
-
-$body.Add((New-Paragraph -Text '9. 完成条件' -Style 'Heading1'))
-$body.Add((New-ListParagraph -Text 'PayPay・JCB・三井住友VISAを解析し、月別・年間・全期間の支出レポートを表示できる。' -NumId 1))
-$body.Add((New-ListParagraph -Text '本人単位で正規化済み取引、月別集計、取込履歴、分類ルールを保存できる。' -NumId 1))
-$body.Add((New-ListParagraph -Text '条件を満たす匿名比較を行い、CSV原本や他人の生明細を保存・表示しない。' -NumId 1))
-$body.Add((New-ListParagraph -Text '自動テスト70件が成功し、停止中・未実装・提出時予定を資料上で誤解なく説明できる。' -NumId 1))
-
-$body.Add((New-Paragraph -Text '参考資料：README.md（最新仕様の正本）、docs/system_prompt_guardrails_v2.md、docs/codex_handoff.md、docs/SpendOps_Dashboard_資料作成情報整理.md' -Style 'SourceNote'))
+$body.Add((New-Paragraph -Text '参考資料：welog「Word・Excelの企画書テンプレート！書き方のポイントも解説」https://welog.jp/blogs/management/free-word-excel-proposal-template/、README.md、project-guidance/codex_handoff.md' -Style 'SourceNote'))
 
 $documentXml = @"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -267,7 +247,7 @@ $documentXml = @"
     <w:sectPr>
       <w:headerReference w:type="default" r:id="rId5"/>
       <w:footerReference w:type="default" r:id="rId6"/>
-      <w:pgSz w:w="11906" w:h="16838"/>
+      <w:pgSz w:w="12240" w:h="15840"/>
       <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/>
       <w:cols w:space="708"/>
       <w:docGrid w:linePitch="360"/>
@@ -280,18 +260,18 @@ $stylesXml = @'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:docDefaults>
-    <w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Yu Gothic" w:cs="Calibri"/><w:sz w:val="19"/><w:szCs w:val="19"/><w:lang w:val="ja-JP" w:eastAsia="ja-JP"/></w:rPr></w:rPrDefault>
-    <w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="270" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr></w:pPrDefault>
+    <w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Yu Gothic" w:cs="Calibri"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="ja-JP" w:eastAsia="ja-JP"/></w:rPr></w:rPrDefault>
+    <w:pPrDefault><w:pPr><w:spacing w:after="160" w:line="320" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr></w:pPrDefault>
   </w:docDefaults>
-  <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="100" w:line="270" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Yu Gothic"/><w:sz w:val="19"/><w:szCs w:val="19"/><w:color w:val="222222"/></w:rPr></w:style>
-  <w:style w:type="paragraph" w:styleId="ProposalTitle"><w:name w:val="Proposal Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="120" w:after="60"/><w:jc w:val="center"/><w:keepNext/></w:pPr><w:rPr><w:b/><w:color w:val="0B2545"/><w:sz w:val="48"/><w:szCs w:val="48"/></w:rPr></w:style>
-  <w:style w:type="paragraph" w:styleId="ProposalSubtitle"><w:name w:val="Proposal Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="220" w:line="250" w:lineRule="auto"/><w:jc w:val="center"/><w:keepNext/></w:pPr><w:rPr><w:color w:val="52606D"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="160" w:line="320" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Yu Gothic"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:color w:val="222222"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:styleId="ProposalTitle"><w:name w:val="Proposal Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="160" w:after="80"/><w:jc w:val="center"/><w:keepNext/></w:pPr><w:rPr><w:b/><w:color w:val="0B2545"/><w:sz w:val="56"/><w:szCs w:val="56"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:styleId="ProposalSubtitle"><w:name w:val="Proposal Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="300" w:line="280" w:lineRule="auto"/><w:jc w:val="center"/><w:keepNext/></w:pPr><w:rPr><w:color w:val="52606D"/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr></w:style>
   <w:style w:type="paragraph" w:styleId="Kicker"><w:name w:val="Kicker"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="0" w:after="80"/><w:jc w:val="center"/><w:keepNext/></w:pPr><w:rPr><w:b/><w:color w:val="2E74B5"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:spacing w:val="20"/></w:rPr></w:style>
-  <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:keepLines/><w:spacing w:before="250" w:after="130"/></w:pPr><w:rPr><w:b/><w:color w:val="2E74B5"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr></w:style>
-  <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:keepLines/><w:spacing w:before="180" w:after="90"/></w:pPr><w:rPr><w:b/><w:color w:val="2E74B5"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:keepLines/><w:spacing w:before="360" w:after="200"/></w:pPr><w:rPr><w:b/><w:color w:val="2E74B5"/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:keepLines/><w:spacing w:before="240" w:after="120"/></w:pPr><w:rPr><w:b/><w:color w:val="2E74B5"/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr></w:style>
   <w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:keepLines/><w:spacing w:before="160" w:after="80"/></w:pPr><w:rPr><w:b/><w:color w:val="1F4D78"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr></w:style>
-  <w:style w:type="paragraph" w:styleId="Callout"><w:name w:val="Callout"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="20" w:after="100" w:line="260" w:lineRule="auto"/><w:ind w:left="220" w:right="220"/><w:shd w:val="clear" w:color="auto" w:fill="F4F6F9"/><w:pBdr><w:left w:val="single" w:sz="18" w:space="8" w:color="2E74B5"/></w:pBdr></w:pPr><w:rPr><w:color w:val="1F2D3D"/></w:rPr></w:style>
-  <w:style w:type="paragraph" w:styleId="TableText"><w:name w:val="Table Text"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="left"/></w:pPr><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:styleId="Callout"><w:name w:val="Callout"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:before="40" w:after="160" w:line="300" w:lineRule="auto"/><w:ind w:left="240" w:right="240"/><w:shd w:val="clear" w:color="auto" w:fill="F4F6F9"/><w:pBdr><w:left w:val="single" w:sz="18" w:space="8" w:color="2E74B5"/></w:pBdr></w:pPr><w:rPr><w:color w:val="1F2D3D"/></w:rPr></w:style>
+  <w:style w:type="paragraph" w:styleId="TableText"><w:name w:val="Table Text"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="0" w:line="280" w:lineRule="auto"/><w:jc w:val="left"/></w:pPr><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:style>
   <w:style w:type="paragraph" w:styleId="SourceNote"><w:name w:val="Source Note"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="80" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:rPr><w:color w:val="66727D"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr></w:style>
   <w:style w:type="paragraph" w:styleId="Spacer"><w:name w:val="Spacer"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="80"/></w:pPr><w:rPr><w:sz w:val="4"/><w:szCs w:val="4"/></w:rPr></w:style>
 </w:styles>
@@ -302,11 +282,11 @@ $numberingXml = @'
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:abstractNum w:abstractNumId="0">
     <w:multiLevelType w:val="singleLevel"/>
-    <w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="•"/><w:lvlJc w:val="left"/><w:pPr><w:tabs><w:tab w:val="num" w:pos="500"/></w:tabs><w:spacing w:after="45" w:line="250" w:lineRule="auto"/><w:ind w:left="500" w:hanging="250"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial"/></w:rPr></w:lvl>
+    <w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="•"/><w:lvlJc w:val="left"/><w:pPr><w:tabs><w:tab w:val="num" w:pos="540"/></w:tabs><w:spacing w:after="80" w:line="290" w:lineRule="auto"/><w:ind w:left="540" w:hanging="279"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial"/></w:rPr></w:lvl>
   </w:abstractNum>
   <w:abstractNum w:abstractNumId="1">
     <w:multiLevelType w:val="singleLevel"/>
-    <w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:lvlJc w:val="left"/><w:pPr><w:tabs><w:tab w:val="num" w:pos="500"/></w:tabs><w:spacing w:after="45" w:line="250" w:lineRule="auto"/><w:ind w:left="500" w:hanging="250"/></w:pPr></w:lvl>
+    <w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:lvlJc w:val="left"/><w:pPr><w:tabs><w:tab w:val="num" w:pos="540"/></w:tabs><w:spacing w:after="80" w:line="290" w:lineRule="auto"/><w:ind w:left="540" w:hanging="279"/></w:pPr></w:lvl>
   </w:abstractNum>
   <w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>
   <w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num>
@@ -367,7 +347,7 @@ $settingsXml = @'
 $coreXml = @'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <dc:title>SpendOps Dashboard 企画書 更新版</dc:title><dc:subject>PayPay・JCB・三井住友VISA支出分析Webアプリ</dc:subject><dc:creator>SpendOps Dashboard Project</dc:creator><cp:lastModifiedBy>SpendOps Dashboard Project</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">2026-07-29T00:00:00Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2026-07-29T00:00:00Z</dcterms:modified>
+  <dc:title>SpendOps Dashboard 企画書</dc:title><dc:subject>複数人CSV比較分析Webアプリ</dc:subject><dc:creator>SpendOps Dashboard Project</dc:creator><cp:lastModifiedBy>SpendOps Dashboard Project</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">2026-07-15T00:00:00Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2026-07-15T00:00:00Z</dcterms:modified>
 </cp:coreProperties>
 '@
 

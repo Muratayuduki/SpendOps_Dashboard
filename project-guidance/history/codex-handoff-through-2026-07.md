@@ -6,8 +6,8 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 ## 作業開始時の必須手順
 
 1. `README.md` でプロジェクト概要、最新仕様、完了条件を確認する
-2. `docs/system_prompt_guardrails_v2.md` でガードレール、禁止事項、出力方針を確認する
-3. この `docs/codex_handoff.md` で進捗、Notion更新履歴、未決事項、次回作業を確認する
+2. `project-guidance/system_prompt_guardrails_v2.md` でガードレール、禁止事項、出力方針を確認する
+3. この `project-guidance/codex_handoff.md` で進捗、Notion更新履歴、未決事項、次回作業を確認する
 4. 既存資料、既存コード、既存draw.ioを確認してから変更する
 5. 不明点が成果物の品質に大きく影響する場合は、推測せず質問する
 6. 個人情報、金融情報、メール本文全文、カード番号、ログイン情報、認証コードを保存・出力しない
@@ -37,7 +37,7 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 - AWS Cost ExplorerによるAWS料金取得は初期版から削除する。複数人の収支CSV比較分析に集中する
 - AWS基盤はTerraformで管理する。2026-07-22に再構築した基盤は、Planとユーザー承認を経て2026-07-23に全削除した。今後の再構築・変更・デプロイもPlan確認とユーザー承認後に行う
 - 2026-07-23時点でTerraform stateは0件。ローカルのコード、資料、Terraform定義、draw.ioは保持している
-- 約20分の自由閲覧向け展示資料を `outputs/SpendOps_Dashboard_展示資料.pptx`、技術別紙を `outputs/SpendOps_Dashboard_技術解説.docx` として作成済み。展示資料はネイティブGoogle Slidesへ取込済みで、2・5・6枚目に `photo/S_2.png`、`photo/S_5.png`、`photo/S_6.png` の実画面を反映した。技術別紙もGoogle Docsへ取込済みで、Google Slides最終ページからリンクしている
+- 約20分の自由閲覧向け展示資料を `materials/deliverables/SpendOps_Dashboard_展示資料.pptx`、技術別紙を `materials/deliverables/SpendOps_Dashboard_技術解説.docx` として作成済み。展示資料はネイティブGoogle Slidesへ取込済みで、2・5・6枚目に `materials/images/screenshots/S_2.png`、`materials/images/screenshots/S_5.png`、`materials/images/screenshots/S_6.png` の実画面を反映した。技術別紙もGoogle Docsへ取込済みで、Google Slides最終ページからリンクしている
 
 ## 現在の停止位置（2026-07-23 AWS基盤削除後）
 
@@ -79,15 +79,16 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 - Destroy前に学習内容の控えを書き出し、再構築後に一度読み戻せる。フロント45件、Lambda 24件、合計69件と構文・Terraform検証が成功。Terraform Applyは3件追加、6件変更、0件削除で、既存テーブル、Cognito、保存済み取引の削除・置換はない
 - CloudFrontキャッシュ更新、独自ドメインの新画面・スクリプト・スタイルHTTP 200、APIヘルスHTTP 200、未認証ルールAPIのHTTP 401、新DynamoDBテーブルの稼働・削除保護・PITR有効、Apply後のTerraform差分なしを確認済み
 - 2026-07-23にユーザーから明示的な削除依頼と最終承認を受け、削除保護解除とTerraform Destroyを実行した
-- アイコン、ロゴ、キービジュアル、発表資料用画像の共通情報を `docs/app_visual_brief.md` に整理した
+- アイコン、ロゴ、キービジュアル、発表資料用画像の共通情報を `materials/source/app_visual_brief.md` に整理した
 - 原本CSV、ファイル名、未加工行、商品名、カード番号、口座番号は保存対象外。正規化した取引日、金額、利用先、カテゴリ、支払い元を個別取引として保存する
-- `docs/0715log.md` の内容はREADMEとこのファイルへ統合し、個別ログは削除する
+- 旧個別ログの内容はREADMEとこのファイルへ統合し、元ファイルは削除する
 - 7月31日完成を目標にNotionガントを再作成済み。2026-07-22に主機能の開発・試走完了を反映し、残作業をデザイン修正、分類精度強化、資料作成、発表資料作成の4項目へ限定
 - Destroy Planは追加0、変更0、削除38。DynamoDBは月別集計84件、取込履歴21件、比較集計0件、取引明細0件、Cognitoは3アカウント
 - 削除前のDynamoDB 4テーブルはPITRが35日で有効だったため、削除時システムバックアップから35日以内に新テーブルへ復元可能。Cognitoは自己復元不可で、削除後14日以内のAWS Supportによる復旧支援のみ
 
 ## 更新履歴
 
+- 2026-08-01: プロジェクト直下を整理。機能実装を`implementation/`、構成図・Notion・成果物・画像・生成ツール・中間生成物を`materials/`、プロンプト・ガードレール・Codex引継ぎを`project-guidance/`へ集約した。`README.md`、`AGENTS.md`、`.agents/`、`.codex/`は自動検出と正本運用のためルートに維持し、全参照、生成先、テストコマンド、カスタムエージェント、スキルを新パスへ更新した。
 - 2026-07-03: Notionの「SpendOps Dashboard 開発計画」をPayPay CSV化方針に更新。
 - 2026-07-08: 横浜銀行もGmail取得対象外に変更。初期版ではJCBカードも含め、PayPay / 横浜銀行 / JCBカードをCSVアップロード方式に統一する方針へ更新。
 - 2026-07-08: Notion本ページの親ページ、01〜06ページ、項目別ガントチャート、主要タスクDB項目をCSV統一方針へ更新。
@@ -120,15 +121,15 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 - 2026-07-22: ユーザー承認後に先月比較配色のTerraform PlanをApply。0件追加、3件変更、0件削除で公開3資産を更新。CloudFrontキャッシュ更新、独自ドメインのHTTP 200、赤・青の配色と判定ロジック、APIヘルス、Terraform差分なしを確認。
 - 2026-07-22: 「その他」を利用先・支払い元単位で修正用CSVへ書き出し、編集後に読み戻して明細と月別集計へ反映する機能を実装・公開。Terraform Destroy後の復元用ファイルとして再利用できる。Amazon、Apple、Google、楽天市場は「ネットでの購入」へ分類。64件の自動テスト、構文確認、Terraform Apply（0追加、4変更、0削除）、キャッシュ更新、公開HTTP確認が成功。
 - 2026-07-22: 本人別の分類学習を実装・公開。専用の見直し画面、次回取込への自動適用、Destroy前の控え書き出し・再構築後の読み戻し、JWT本人分離API、利用先名を保存しない照合用ハッシュ方式を追加。69件の自動テスト、Terraform Apply（3追加、6変更、0削除）、キャッシュ更新、公開HTTP・認証保護・新テーブル保護設定・再Plan差分なしの確認が成功。
-- 2026-07-22: サイトを今後使用するためTerraform Destroyを行わず、公開基盤を継続利用する方針を確定。アイコン・画像生成へ使うアプリ概要とビジュアル制作要件を `docs/app_visual_brief.md` に作成。
+- 2026-07-22: サイトを今後使用するためTerraform Destroyを行わず、公開基盤を継続利用する方針を確定。アイコン・画像生成へ使うアプリ概要とビジュアル制作要件を `materials/source/app_visual_brief.md` に作成。
 - 2026-07-23: 削除前に個別取引3,477件、月別集計60件、取込履歴17件、分類ルール0件、Cognitoユーザー3件とDynamoDB 4テーブルのPITR有効を確認。削除保護解除Planは追加0、変更6、削除0で、実変更5件を適用。
 - 2026-07-23: 最新Destroy Planの追加0、変更0、削除42と全件が削除操作であることを確認し、ユーザー承認後に適用。Terraform state 0件と、AWS主要9分類の対象リソース残存0件を確認。今回のDynamoDBシステムバックアップ4件は `AVAILABLE` で、2026年8月27日まで保持される。Cloudflare DNSとローカル成果物は変更していない。
 - 2026-07-23: ユーザー情報を残さず比較データだけを保持する方針を確定。月別集計60件を一時復元し、元CognitoユーザーIDを対応表を残さないランダムIDへ置換。匿名参加者3人、集計総額一致、想定外属性0件を確認し、オンデマンドバックアップ `spendops-anonymized-comparison-20260723` を作成した。一時テーブル2件は削除済み。
 - 2026-07-23: 未匿名システムバックアップ8件の早期削除を試みたが、AWSがシステムバックアップの手動削除を拒否。過去分4件は2026年8月19日、今回分4件は2026年8月27日に自動失効する。匿名化オンデマンドバックアップ1件だけを長期保持する。
 - 2026-07-23: 新しいアプリアイコンをWeb資産へ追加。ブラウザのfavicon、Apple Touch Icon、ヘッダーのブランドマークへ反映し、TerraformのS3配信対象と参照切れテストも追加した。フロントエンド46件、Lambda 24件の合計70件、JavaScript構文、Terraform整形・構成検証が成功した。
-- 2026-07-23: ランダムな10人が約20分で自由閲覧する展示形式を想定し、本編12枚の `outputs/SpendOps_Dashboard_展示資料.pptx` と、セキュリティ・個人情報保護・技術選定・制約を分離した `outputs/SpendOps_Dashboard_技術解説.docx` を作成。PPTXはPowerPointで12枚をPNGへ実描画して全ページを目視確認し、PPTX 58 XML部品・DOCX 9 XML部品の不正0件、フロント46件・Lambda 24件の合計70件成功を再確認した。Google Drive連携が現在のセッションにないため、ネイティブ取込と技術資料URLへの差し替えは次回作業とする。
-- 2026-07-23: 展示資料PPTXをネイティブGoogle Slidesへ取り込み、全12枚を確認。5枚目「読み方」の擬似UIを `photo/img.png` の実画面へ置き換え、更新後の全12枚を1600×900で再描画して重なり・欠けがないことを目視確認した。Google Slides: https://docs.google.com/presentation/d/1dLuDz0po8TevuVGNh3AkZN7q5vOh5dJcy9egA1_cPPM
-- 2026-07-23: `photo/S_2.png`、`photo/S_5.png`、`photo/S_6.png` をGoogle Slidesの2・5・6枚目へ反映。技術解説DOCXをネイティブGoogle Docsへ取り込み、12枚目の無効なローカルファイルリンクをGoogle Docs URLへ置換した。更新後の全12枚を1600×900で再描画し、重なり・欠けがないことを目視確認した。Google Docs: https://docs.google.com/document/d/1BXnVu_XaYEiMqYG8pmUy0HvkbhnoSvmSMOo2H1YOwEY
+- 2026-07-23: ランダムな10人が約20分で自由閲覧する展示形式を想定し、本編12枚の `materials/deliverables/SpendOps_Dashboard_展示資料.pptx` と、セキュリティ・個人情報保護・技術選定・制約を分離した `materials/deliverables/SpendOps_Dashboard_技術解説.docx` を作成。PPTXはPowerPointで12枚をPNGへ実描画して全ページを目視確認し、PPTX 58 XML部品・DOCX 9 XML部品の不正0件、フロント46件・Lambda 24件の合計70件成功を再確認した。Google Drive連携が現在のセッションにないため、ネイティブ取込と技術資料URLへの差し替えは次回作業とする。
+- 2026-07-23: 展示資料PPTXをネイティブGoogle Slidesへ取り込み、全12枚を確認。5枚目「読み方」の擬似UIを当時の実画面へ置き換え、更新後の全12枚を1600×900で再描画して重なり・欠けがないことを目視確認した。Google Slides: https://docs.google.com/presentation/d/1dLuDz0po8TevuVGNh3AkZN7q5vOh5dJcy9egA1_cPPM
+- 2026-07-23: `materials/images/screenshots/S_2.png`、`materials/images/screenshots/S_5.png`、`materials/images/screenshots/S_6.png` をGoogle Slidesの2・5・6枚目へ反映。技術解説DOCXをネイティブGoogle Docsへ取り込み、12枚目の無効なローカルファイルリンクをGoogle Docs URLへ置換した。更新後の全12枚を1600×900で再描画し、重なり・欠けがないことを目視確認した。Google Docs: https://docs.google.com/document/d/1BXnVu_XaYEiMqYG8pmUy0HvkbhnoSvmSMOo2H1YOwEY
 
 ## 2026-07-08 要件整理履歴
 
@@ -162,10 +163,10 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 今回更新した資料:
 
 - `README.md`
-- `docs/system_prompt_guardrails_v2.md`
-- `docs/codex_handoff.md`
-- `notion/spendops_dashboard_notion_plan_with_gantt.md`
-- `drowio/spendops_aws_architecture.drawio`
+- `project-guidance/system_prompt_guardrails_v2.md`
+- `project-guidance/codex_handoff.md`
+- `materials/notion/spendops_dashboard_notion_plan_with_gantt.md`
+- `materials/architecture/spendops_aws_architecture.drawio`
 - Notion本体の `08 要件変更：複数人CSV比較分析サービス`
 
 ## Notion更新履歴
@@ -214,14 +215,14 @@ README にはプロジェクト概要と仕様を置き、Codex 向けの進め�
 
 | パス | 内容 | 注意 |
 |---|---|---|
-| `notion/spendops_dashboard_notion_plan_with_gantt.md` | Notion計画資料のローカル版 | 2026-07-22に期間別ガントと同期 |
-| `drowio/spendops_aws_architecture.drawio` | AWS構成図 | 2026-07-08にCSV統一方針へ更新。開けない問題に対応するため通常図形ベースへ修正 |
-| `docs/system_prompt_guardrails_v2.md` | system prompt・ガードレール | 2026-07-08にCSV統一方針へ更新 |
-| `docs/custom_domain_cloudflare_setup.md` | 独自サブドメイン設定手順書 | `cache.yuduki0303.com` のCloudflare DNS操作と二段階公開手順 |
+| `materials/notion/spendops_dashboard_notion_plan_with_gantt.md` | Notion計画資料のローカル版 | 2026-07-22に期間別ガントと同期 |
+| `materials/architecture/spendops_aws_architecture.drawio` | AWS構成図 | 2026-07-08にCSV統一方針へ更新。開けない問題に対応するため通常図形ベースへ修正 |
+| `project-guidance/system_prompt_guardrails_v2.md` | system prompt・ガードレール | 2026-07-08にCSV統一方針へ更新 |
+| `implementation/docs/operations/custom_domain_cloudflare_setup.md` | 独自サブドメイン設定手順書 | `cache.yuduki0303.com` のCloudflare DNS操作と二段階公開手順 |
 | `README.md` | プロジェクト概要、公開状態、2026-07-15実装履歴、次回作業 | 2026-07-15の作業ログを統合済み |
 | `AGENTS.md` | Codexのリポジトリ作業ルール | 作業開始時に読むファイルを定義 |
-| `outputs/SpendOps_Dashboard_展示資料.pptx` | 12枚・約20分の自由閲覧向け本編 | Google Slidesへ取込済み。2・5・6枚目の実画面はGoogle Slides版に反映 |
-| `outputs/SpendOps_Dashboard_技術解説.docx` | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
+| `materials/deliverables/SpendOps_Dashboard_展示資料.pptx` | 12枚・約20分の自由閲覧向け本編 | Google Slidesへ取込済み。2・5・6枚目の実画面はGoogle Slides版に反映 |
+| `materials/deliverables/SpendOps_Dashboard_技術解説.docx` | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
 
 ## 次回以降の優先作業
 

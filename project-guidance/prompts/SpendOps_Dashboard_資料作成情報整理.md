@@ -6,7 +6,7 @@
 
 企画書、技術解説、発表スライドなどを作成する前に、アプリ概要、技術の選定理由、現状の課題、未確定事項を一か所へ整理する。
 
-最新仕様と現在状態の正本は`README.md`とする。ほかの資料と記述が異なる場合は`README.md`を優先し、作業履歴の詳細だけを`docs/codex_handoff.md`で補足する。
+最新仕様と現在状態の正本は`README.md`とする。ほかの資料と記述が異なる場合は`README.md`を優先し、現在の停止地点は`project-guidance/current-handoff.md`、過去の詳細は`project-guidance/history/`の該当箇所だけで補足する。
 
 実在する利用明細、氏名、メールアドレス、カード番号、口座番号、ログイン情報、認証コードは資料へ掲載しない。
 
@@ -141,7 +141,7 @@ DynamoDB（取引・月別集計・取込履歴・分類ルール）
 監視: CloudWatch Logs / Metrics
 ```
 
-AWS基盤は2026-07-23に削除済みで、現在は公開サイト、ログイン、API、クラウド保存を利用できない。ソースコード、Terraform定義、テスト、設計資料はローカルに保持しており、AWSの論理構成とアプリ側の実装は残っている。現在利用できるのは、空設定の`app-site/config.js`を使った未ログインのローカル分析である。AWSを再構築する場合は、新しいPlan、料金、公開範囲を確認してから実施する。
+AWS基盤は2026-07-23に削除済みで、現在は公開サイト、ログイン、API、クラウド保存を利用できない。ソースコード、Terraform定義、テスト、設計資料はローカルに保持しており、AWSの論理構成とアプリ側の実装は残っている。現在利用できるのは、空設定の`implementation/app-site/config.js`を使った未ログインのローカル分析である。AWSを再構築する場合は、新しいPlan、料金、公開範囲を確認してから実施する。
 
 ## 3. 技術の選定理由
 
@@ -318,15 +318,16 @@ AWS基盤は2026-07-23に削除済みで、現在は公開サイト、ログイ�
 ## 9. 参照したリポジトリ内資料
 
 - `README.md`
-- `docs/system_prompt_guardrails_v2.md`
-- `docs/codex_handoff.md`
-- `docs/app_visual_brief.md`
-- `docs/build_spendops_proposal.ps1`
-- `docs/build_spendops_technical_guide.ps1`
-- `notion/spendops_dashboard_notion_plan_with_gantt.md`
-- `drowio/spendops_aws_architecture.drawio`
-- `app-site/index.html`
-- `app-site/script.js`
-- `app-site/auth.js`
-- `lambda/src/handler.py`
-- `terraform/*.tf`
+- `project-guidance/current-context.md`
+- `project-guidance/active-guardrails.md`
+- `project-guidance/current-handoff.md`
+- `materials/source/app_visual_brief.md`
+- `materials/tools/build_spendops_proposal.ps1`
+- `materials/tools/build_spendops_technical_guide.ps1`
+- `materials/notion/spendops_dashboard_notion_plan_with_gantt.md`
+- `materials/architecture/spendops_aws_architecture.drawio`
+- `implementation/app-site/index.html`
+- `implementation/app-site/script.js`
+- `implementation/app-site/auth.js`
+- `implementation/lambda/src/handler.py`
+- `implementation/terraform/*.tf`

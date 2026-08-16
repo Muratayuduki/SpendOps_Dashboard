@@ -7,7 +7,7 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 > [!IMPORTANT]
 > 2026-07-23にAWS基盤をTerraform Destroyで削除したため、公開サイト、ログイン、クラウド保存、APIは現在停止中です。ソースコード、Terraform定義、テスト、設計資料はローカルに保持しています。
 
-最終精査日: 2026-07-23
+最終精査日: 2026-08-01
 
 ## 現在の状態
 
@@ -19,7 +19,7 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 | 公開サイト | AWS配信基盤を削除済みのため停止中 |
 | API・認証・DB | API Gateway、Lambda、Cognito、DynamoDBを削除済み |
 | Terraform state | 0エントリ。2026-07-23にローカルで再確認済み |
-| ローカル設定 | `app-site/config.js` は空設定。未ログインのローカル分析のみ利用可能 |
+| ローカル設定 | `implementation/app-site/config.js` は空設定。未ログインのローカル分析のみ利用可能 |
 | 自動テスト | フロントエンド46件、Lambda 24件、合計70件成功 |
 | 直近の目標 | 2026-07-31までに仕上げ、2026-09-07の学校課題提出に備える |
 
@@ -173,7 +173,7 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 | 長期バックアップ内容 | 匿名化済み月別集計60件、匿名参加者3人分 |
 | Cloudflare DNS | Terraform管理外。削除済みCloudFrontを参照する公開用CNAMEが残っている可能性あり |
 
-長期バックアップには、個別取引、利用先、取込履歴、分類ルール、Cognito情報、元ユーザーID、匿名IDとの対応表を含めていません。詳細は[`docs/anonymized_comparison_backup.md`](docs/anonymized_comparison_backup.md)を参照してください。
+長期バックアップには、個別取引、利用先、取込履歴、分類ルール、Cognito情報、元ユーザーID、匿名IDとの対応表を含めていません。詳細は[`implementation/docs/operations/anonymized_comparison_backup.md`](implementation/docs/operations/anonymized_comparison_backup.md)を参照してください。
 
 未匿名のDynamoDBシステムバックアップ8件はAWS側で手動削除できませんでした。復元やコピーは行わず、4件は2026-08-19、残り4件は2026-08-27の自動失効を待ちます。
 
@@ -183,16 +183,14 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 
 | パス | 内容 |
 |---|---|
-| `app-site/` | HTML・CSS・JavaScript製のWebアプリ、認証、比較用合成データ |
-| `app-site/tests/` | CSV解析、集計、比較、認証、分類、画面要素のテスト |
-| `lambda/src/` | API Gatewayから呼び出すPython Lambda |
-| `lambda/tests/` | Lambdaの入力検証、保存、認可、比較のテスト |
-| `terraform/` | Cognito、DynamoDB、Lambda、API Gateway、S3、CloudFront、ACM等の定義 |
-| `docs/` | ガードレール、引き継ぎ、バックアップ、独自ドメイン、企画資料 |
-| `drowio/` | diagrams.net形式のAWS構成図 |
-| `notion/` | Notion計画のローカル版 |
-| `portfolio-site/` | 別途作成したポートフォリオ用静的サイト |
-| `csv/` | ローカル検証用CSV。金融情報として慎重に扱い、内容をログや資料へ転記しない |
+| `implementation/app-site/` | HTML・CSS・JavaScript製のWebアプリ、認証、比較用合成データ |
+| `implementation/lambda/` | API Gatewayから呼び出すPython Lambdaとテスト |
+| `implementation/terraform/` | Cognito、DynamoDB、Lambda、API Gateway、S3、CloudFront、ACM等の定義 |
+| `implementation/csv/` | ローカル検証用CSV。金融情報として慎重に扱い、内容をログや資料へ転記しない |
+| `implementation/portfolio-site/` | 別途作成したポートフォリオ用静的サイト |
+| `materials/` | 構成図、Notionローカル版、成果物、画像、生成ツール、中間生成物 |
+| `project-guidance/` | 短い現在コンテキストとアクティブガードレール、現在引継ぎ、履歴、資料作成用プロンプト |
+| `.agents/` / `.codex/` | リポジトリスキル、カスタムエージェント、Codexプロジェクト設定 |
 
 ## ローカルでの確認
 
@@ -209,10 +207,10 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 リポジトリのルートで次を実行します。
 
 ```powershell
-python -m http.server 3000 --directory app-site
+python -m http.server 3000 --directory implementation/app-site
 ```
 
-ブラウザで`http://localhost:3000`を開きます。`app-site/config.js`が空設定のため、AWS削除後の現在はログインとクラウド保存を使えませんが、CSVのローカル解析と画面表示は確認できます。
+ブラウザで`http://localhost:3000`を開きます。`implementation/app-site/config.js`が空設定のため、AWS削除後の現在はログインとクラウド保存を使えませんが、CSVのローカル解析と画面表示は確認できます。
 
 実CSVには金融情報が含まれ得ます。画面共有、スクリーンショット、ログ、ドキュメントへ内容を残さないでください。
 
@@ -221,10 +219,10 @@ python -m http.server 3000 --directory app-site
 ### フロントエンド
 
 ```powershell
-node app-site/tests/analysis.test.js
-node app-site/tests/auth.test.js
-node app-site/tests/generated-comparison.test.js
-node --check app-site/script.js
+node implementation/app-site/tests/analysis.test.js
+node implementation/app-site/tests/auth.test.js
+node implementation/app-site/tests/generated-comparison.test.js
+node --check implementation/app-site/script.js
 ```
 
 2026-07-23の結果: 38件 + 3件 + 5件、合計46件成功。JavaScript構文確認も成功。
@@ -232,7 +230,7 @@ node --check app-site/script.js
 ### Lambda
 
 ```powershell
-python -B -m unittest discover -s lambda/tests -p 'test_*.py'
+python -B -m unittest discover -s implementation/lambda/tests -p 'test_*.py'
 ```
 
 2026-07-23の結果: 24件成功。
@@ -242,7 +240,7 @@ python -B -m unittest discover -s lambda/tests -p 'test_*.py'
 初回確認時は、先に`terraform init`を実行してください。既存の初期化済み環境では次を確認します。
 
 ```powershell
-Set-Location terraform
+Set-Location implementation/terraform
 terraform fmt -check
 terraform validate
 terraform state list
@@ -252,7 +250,7 @@ terraform state list
 
 ## AWS再構築
 
-Terraform定義は[`terraform/README.md`](terraform/README.md)にまとめています。再構築はAWS料金、公開範囲、認証、保存先へ影響するため、必ず新しいPlanを確認し、ユーザー承認後に実施します。
+Terraform定義は[`implementation/terraform/README.md`](implementation/terraform/README.md)にまとめています。再構築はAWS料金、公開範囲、認証、保存先へ影響するため、必ず新しいPlanを確認し、ユーザー承認後に実施します。
 
 再構築時の要点:
 
@@ -263,7 +261,7 @@ Terraform定義は[`terraform/README.md`](terraform/README.md)にまとめてい
 5. 公開用`cache` CNAMEを新しいCloudFrontドメインへ更新する
 6. AWS変更・Apply・デプロイは事前承認後に行う
 
-Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存しません。詳細は[`docs/custom_domain_cloudflare_setup.md`](docs/custom_domain_cloudflare_setup.md)を参照してください。
+Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存しません。詳細は[`implementation/docs/operations/custom_domain_cloudflare_setup.md`](implementation/docs/operations/custom_domain_cloudflare_setup.md)を参照してください。
 
 ## 既知の制限と残作業
 
@@ -279,7 +277,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 比較用合成データは実統計ではなく、元データが少ないため参考値としての精度に限界がある
 - 収入、資産推移、予算管理は未実装
 - デザイン、情報密度、分類精度、テストデータの仕上げと、作成済み展示資料のGoogle Drive取込が残っている
-- `drowio`、Notionローカル版、ビジュアルブリーフの一部にAWS削除前の記述があり、READMEとの同期が必要
+- 構成図、Notionローカル版、ビジュアルブリーフの一部にAWS削除前の記述があり、READMEとの同期が必要
 
 ## 完了条件
 
@@ -312,18 +310,24 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 
 | パス | 内容 | 現在の注意 |
 |---|---|---|
-| [`docs/system_prompt_guardrails_v2.md`](docs/system_prompt_guardrails_v2.md) | セキュリティ・作業ガードレール | 作業前に必ず確認 |
-| [`docs/codex_handoff.md`](docs/codex_handoff.md) | 詳細な実装履歴、次回作業、未決事項 | READMEより詳しい時系列記録 |
-| [`docs/anonymized_comparison_backup.md`](docs/anonymized_comparison_backup.md) | 匿名比較バックアップの保持・復元方針 | 長期バックアップの正本 |
-| [`terraform/README.md`](terraform/README.md) | AWS構成、API、Terraform操作 | Apply前の承認が必要 |
-| [`docs/custom_domain_cloudflare_setup.md`](docs/custom_domain_cloudflare_setup.md) | 独自サブドメイン再接続手順 | 新しいoutputを正とする |
-| [`drowio/spendops_aws_architecture.drawio`](drowio/spendops_aws_architecture.drawio) | AWS構成図 | 分類ルールDBと削除後状態の同期が必要 |
-| [`notion/spendops_dashboard_notion_plan_with_gantt.md`](notion/spendops_dashboard_notion_plan_with_gantt.md) | 7月完成計画 | 一部のAWS削除記録が旧状態 |
-| [`docs/app_visual_brief.md`](docs/app_visual_brief.md) | ロゴ・画像・発表資料用ブリーフ | 公開継続の記述が削除前状態 |
-| [`outputs/SpendOps_Dashboard_展示資料.pptx`](outputs/SpendOps_Dashboard_展示資料.pptx) | 12枚・約20分の自由閲覧向け展示資料 | Google Slidesへ取込済み。5枚目の実画面はGoogle Slides版に反映 |
-| [`outputs/SpendOps_Dashboard_技術解説.docx`](outputs/SpendOps_Dashboard_技術解説.docx) | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
+| [`project-guidance/current-context.md`](project-guidance/current-context.md) | Codex向けの短いプロジェクト概要と現在状態 | 通常作業の開始時に確認 |
+| [`project-guidance/active-guardrails.md`](project-guidance/active-guardrails.md) | 常時適用する安全規則と実行境界 | 通常作業の開始時に確認 |
+| [`project-guidance/current-handoff.md`](project-guidance/current-handoff.md) | 現在の停止地点、次回作業、未決事項 | 現在状態が関係する場合に確認 |
+| [`project-guidance/history/`](project-guidance/history/) | 詳細な日別・月別作業履歴 | 必要な日付・語句だけ検索 |
+| [`implementation/docs/operations/anonymized_comparison_backup.md`](implementation/docs/operations/anonymized_comparison_backup.md) | 匿名比較バックアップの保持・復元方針 | 長期バックアップの正本 |
+| [`implementation/terraform/README.md`](implementation/terraform/README.md) | AWS構成、API、Terraform操作 | Apply前の承認が必要 |
+| [`implementation/docs/operations/custom_domain_cloudflare_setup.md`](implementation/docs/operations/custom_domain_cloudflare_setup.md) | 独自サブドメイン再接続手順 | 新しいoutputを正とする |
+| [`materials/architecture/spendops_aws_architecture.drawio`](materials/architecture/spendops_aws_architecture.drawio) | AWS構成図 | 分類ルールDBと削除後状態の同期が必要 |
+| [`materials/notion/spendops_dashboard_notion_plan_with_gantt.md`](materials/notion/spendops_dashboard_notion_plan_with_gantt.md) | 7月完成計画 | 一部のAWS削除記録が旧状態 |
+| [`materials/source/app_visual_brief.md`](materials/source/app_visual_brief.md) | ロゴ・画像・発表資料用ブリーフ | 公開継続の記述が削除前状態 |
+| [`materials/deliverables/SpendOps_Dashboard_展示資料.pptx`](materials/deliverables/SpendOps_Dashboard_展示資料.pptx) | 12枚・約20分の自由閲覧向け展示資料 | Google Slidesへ取込済み。5枚目の実画面はGoogle Slides版に反映 |
+| [`materials/deliverables/SpendOps_Dashboard_技術解説.docx`](materials/deliverables/SpendOps_Dashboard_技術解説.docx) | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
+| [SpendOps Dashboard 10分展示発表（Google Slides）](https://docs.google.com/presentation/d/1WSOxf4kgJBEZs7VNk1aPSyvjvut5bp7IJF7TwJCiCp8/edit?usp=drivesdk) | 8枚・9分10秒の説明と2分40秒デモ向け発表資料 | 4枚目の画面画像から合成デモ動画を開ける |
+| [`materials/deliverables/SpendOps_Dashboard_デモ動画_2分40秒.webm`](materials/deliverables/SpendOps_Dashboard_デモ動画_2分40秒.webm) | 1600×900、無音・字幕付きの合成デモ動画 | 実CSV、公開URL、ブラウザプロフィールを含まない |
+| [`materials/deliverables/SpendOps_Dashboard_10分発表_台本とデモ手順.md`](materials/deliverables/SpendOps_Dashboard_10分発表_台本とデモ手順.md) | 10分の進行、話す内容、動画のカット割り | 本編9分10秒、操作待ちなどの余白50秒 |
+| [`materials/deliverables/SpendOps_Dashboard_デザインレビュー.md`](materials/deliverables/SpendOps_Dashboard_デザインレビュー.md) | 実画面とコードに基づくデザインレビュー | 合成デモの比較切替などを改善候補として記録 |
 
-詳細な日別作業ログはREADMEへ重複させず、`docs/codex_handoff.md`で管理します。
+詳細な日別作業ログはREADMEへ重複させず、`project-guidance/history/YYYY-MM.md`で管理します。現在の停止地点と次回作業だけを`project-guidance/current-handoff.md`へ反映します。
 
 ## 主要な履歴
 
