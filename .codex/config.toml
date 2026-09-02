@@ -1,0 +1,13 @@
+# ローカル作業は承認プロンプトなしで自動実行する。
+# AWS Apply、Destroy、削除保護解除、外部公開の明示承認はAGENTS.mdとスキル側で維持する。
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = false
+
+[agents]
+max_concurrent_threads_per_session = 3
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"
+interrupt_message = false

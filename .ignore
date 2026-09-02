@@ -1,0 +1,17 @@
+# 通常のrg検索・ファイル列挙から、機密データとバイナリ成果物を除外する。
+# 必要な場合はrg --no-ignore <path>で対象を明示する。
+/implementation/csv/
+/materials/work/
+/materials/deliverables/
+*.docx
+*.pptx
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.drawio
+*.zip
+*.tfplan
+

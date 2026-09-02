@@ -1,0 +1,24 @@
+# このファイルを terraform.tfvars にコピーし、環境に合わせて変更してください。
+# パスワード、アクセスキー、個人情報は記述しないでください。
+
+aws_region  = "ap-northeast-1"
+project_name = "spendops-dashboard"
+environment  = "dev"
+
+lambda_package_path = "../lambda/dist/spendops_api.zip"
+lambda_handler      = "handler.lambda_handler"
+
+allowed_origins = [
+  "http://localhost:3000",
+]
+
+# Cloudflareで管理する公開用サブドメイン。証明書のDNS検証完了後に有効化する。
+custom_domain_name    = "cache.yuduki0303.com"
+activate_custom_domain = true
+
+log_retention_days = 30
+protect_persistent_data = true
+
+additional_tags = {
+  Owner = "personal-development"
+}

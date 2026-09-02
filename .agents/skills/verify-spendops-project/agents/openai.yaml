@@ -1,0 +1,8 @@
+interface:
+  display_name: "SpendOps一括検証"
+  short_description: "フロント、Lambda、Terraformの検証を一括実行します"
+  default_prompt: "Use $verify-spendops-project to run the SpendOps local verification suite and summarize failures."
+
+policy:
+  allow_implicit_invocation: true
+

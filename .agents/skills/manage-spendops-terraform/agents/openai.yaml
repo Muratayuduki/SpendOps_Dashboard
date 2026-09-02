@@ -1,0 +1,8 @@
+interface:
+  display_name: "SpendOps Terraform管理"
+  short_description: "SpendOpsのAWS基盤を安全に構築・破壊・検証します"
+  default_prompt: "Use $manage-spendops-terraform to plan and safely execute the requested SpendOps Terraform lifecycle operation."
+
+policy:
+  allow_implicit_invocation: true
+
