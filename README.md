@@ -5,9 +5,9 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 対象はPayPayとクレジットカードです。現行実装はPayPay、JCB、三井住友VISAに対応し、銀行CSVは対象外です。AWS基盤はTerraformで構築・管理します。
 
 > [!IMPORTANT]
-> 2026-07-23にAWS基盤をTerraform Destroyで削除したため、公開サイト、ログイン、クラウド保存、APIは現在停止中です。ソースコード、Terraform定義、テスト、設計資料はローカルに保持しています。
+> 2026-09-02に新しいAWSアカウントへTerraform第1段階を再構築しました。CloudFront既定ドメインの公開サイトとAPIは稼働中です。独自ドメインはACMのDNS検証待ちで、まだ有効化していません。
 
-最終精査日: 2026-08-01
+最終精査日: 2026-09-02
 
 ## 現在の状態
 
@@ -16,12 +16,12 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 | 対象データ | PayPay、クレジットカード（JCB・三井住友VISA） |
 | 対象外 | 横浜銀行を含む銀行CSV、AWS料金分析 |
 | 主機能 | CSV解析、支出レポート、比較、明細復元、分類学習まで実装済み |
-| 公開サイト | AWS配信基盤を削除済みのため停止中 |
-| API・認証・DB | API Gateway、Lambda、Cognito、DynamoDBを削除済み |
-| Terraform state | 0エントリ。2026-07-23にローカルで再確認済み |
-| ローカル設定 | `implementation/app-site/config.js` は空設定。未ログインのローカル分析のみ利用可能 |
-| 自動テスト | フロントエンド46件、Lambda 24件、合計70件成功 |
-| 直近の目標 | 2026-07-31までに仕上げ、2026-09-07の学校課題提出に備える |
+| 公開サイト | CloudFront既定ドメインで稼働中。HTTPS 200を確認済み |
+| API・認証・DB | API Gateway、Lambda、Cognito、DynamoDBを再構築済み |
+| Terraform state | 48エントリ（管理リソース43件、data 5件）。2026-09-02に再Plan差分0を確認済み |
+| 独自ドメイン | ACMはDNS検証待ち。CloudFront aliasとCloudflare DNSは未変更 |
+| 自動テスト | フロントエンド47件、Lambda 24件、合計71件成功 |
+| 直近の目標 | 2026-09-07の学校課題提出に向けて仕上げる |
 
 ## 解決する課題
 
@@ -96,7 +96,7 @@ UTF-8での読取に失敗した場合はShift_JISを試します。複数ファ
 
 ## システム構成
 
-次の構成をTerraformで定義しています。現在はAWSリソースを削除済みですが、論理構成とコードは保持しています。
+次の構成をTerraformで定義しています。現在は第1段階を再構築済みで、CloudFront既定ドメインを使用しています。独自ドメインだけは未有効です。
 
 ```mermaid
 flowchart LR
@@ -161,21 +161,21 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 
 ## 現在のAWS・バックアップ状態
 
-2026-07-23に、ユーザー承認後のTerraform Destroyで42リソースを削除しました。
+2026-07-23にユーザー承認後のTerraform Destroyで42リソースを削除し、2026-09-02に新しいAWSアカウントへ第1段階の基盤を再構築しました。
 
 | 項目 | 状態 |
 |---|---|
 | AWSリージョン | `ap-northeast-1` |
-| Terraform state | 0エントリ |
-| 削除確認記録 | DynamoDB、Cognito、S3、Lambda、API Gateway、CloudFront、ACM、CloudWatch Logs、IAMの対象リソース0件 |
+| Terraform state | 48エントリ（管理リソース43件、data 5件） |
+| 構築確認記録 | 43追加、0変更、0削除。Apply後の再Planは差分0 |
 | 削除対象データ | 個別取引3,477件、月別集計60件、取込履歴17件、分類ルール0件、Cognitoユーザー3件 |
 | 長期バックアップ | `spendops-anonymized-comparison-20260723` |
 | 長期バックアップ内容 | 匿名化済み月別集計60件、匿名参加者3人分 |
-| Cloudflare DNS | Terraform管理外。削除済みCloudFrontを参照する公開用CNAMEが残っている可能性あり |
+| Cloudflare DNS | Terraform管理外。新しいACM検証用CNAMEと公開用CNAMEは未設定 |
 
 長期バックアップには、個別取引、利用先、取込履歴、分類ルール、Cognito情報、元ユーザーID、匿名IDとの対応表を含めていません。詳細は[`implementation/docs/operations/anonymized_comparison_backup.md`](implementation/docs/operations/anonymized_comparison_backup.md)を参照してください。
 
-未匿名のDynamoDBシステムバックアップ8件はAWS側で手動削除できませんでした。復元やコピーは行わず、4件は2026-08-19、残り4件は2026-08-27の自動失効を待ちます。
+旧AWSアカウントにあった未匿名のDynamoDBシステムバックアップ8件は、4件が2026-08-19、残り4件が2026-08-27に自動失効する予定でした。2026-09-02時点では旧アカウントへアクセスできないため、失効状態は要再確認です。復元やコピーは行いません。
 
 匿名参加者は3人のため、長期バックアップ単体では「他5人以上」の実比較条件を満たしません。
 
@@ -210,7 +210,7 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 python -m http.server 3000 --directory implementation/app-site
 ```
 
-ブラウザで`http://localhost:3000`を開きます。`implementation/app-site/config.js`が空設定のため、AWS削除後の現在はログインとクラウド保存を使えませんが、CSVのローカル解析と画面表示は確認できます。
+ブラウザで`http://localhost:3000`を開きます。リポジトリ内の`implementation/app-site/config.js`は空設定のため、このローカル起動ではログインとクラウド保存を使えませんが、CSVのローカル解析と画面表示は確認できます。CloudFrontへ配置したサイトにはTerraformが生成した設定を使用します。
 
 実CSVには金融情報が含まれ得ます。画面共有、スクリーンショット、ログ、ドキュメントへ内容を残さないでください。
 
@@ -225,7 +225,7 @@ node implementation/app-site/tests/generated-comparison.test.js
 node --check implementation/app-site/script.js
 ```
 
-2026-07-23の結果: 38件 + 3件 + 5件、合計46件成功。JavaScript構文確認も成功。
+2026-09-02の結果: 38件 + 4件 + 5件、合計47件成功。JavaScript構文確認も成功。
 
 ### Lambda
 
@@ -233,7 +233,7 @@ node --check implementation/app-site/script.js
 python -B -m unittest discover -s implementation/lambda/tests -p 'test_*.py'
 ```
 
-2026-07-23の結果: 24件成功。
+2026-09-02の結果: 24件成功。
 
 ### Terraform
 
@@ -246,7 +246,7 @@ terraform validate
 terraform state list
 ```
 
-2026-07-23の結果: フォーマット確認成功、構成検証成功、stateは0エントリ。
+2026-09-02の結果: フォーマット確認成功、構成検証成功、stateは48エントリ、`activate_custom_domain = false`の再Planは差分0。
 
 ## AWS再構築
 
@@ -265,7 +265,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 
 ## 既知の制限と残作業
 
-- AWS基盤削除中のため、公開E2E、ログイン、クラウド保存、実ユーザー比較は実行できない
+- 独自ドメインはACMのDNS検証待ちで、CloudFront既定ドメインを使用している
 - 銀行CSVは対象外
 - PayPay、JCB、VISAの返金・取消表現は実例による追加検証が必要
 - PayPayチャージとカード明細のような異なるソース間の二重計上は自動解消しない
@@ -276,8 +276,8 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 管理者機能は取込バッチ総数の確認のみで、管理画面や詳細エラー確認は未実装
 - 比較用合成データは実統計ではなく、元データが少ないため参考値としての精度に限界がある
 - 収入、資産推移、予算管理は未実装
-- デザイン、情報密度、分類精度、テストデータの仕上げと、作成済み展示資料のGoogle Drive取込が残っている
-- 構成図、Notionローカル版、ビジュアルブリーフの一部にAWS削除前の記述があり、READMEとの同期が必要
+- デザイン、情報密度、分類精度、テストデータの仕上げが残っている
+- Notionローカル版とビジュアルブリーフの一部にAWS削除前の記述があり、READMEとの同期が必要
 
 ## 完了条件
 
@@ -293,18 +293,19 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - [x] 保存済み明細から年間レポートと利用先絞り込みを復元できる
 - [x] 条件を満たす他ユーザーとの匿名比較を実装している
 - [x] CSV原本、未加工行、カード番号、口座番号、認証情報をAWSへ保存しない
-- [x] フロントエンド46件、Lambda 24件のテストが成功する
+- [x] フロントエンド47件、Lambda 24件のテストが成功する
 - [x] TerraformでAWS基盤を構築できる構成がある
 
 ### 仕上げ対象
 
 - [ ] デザイン修正を完了する
 - [ ] 自動分類と表記揺れ対応の精度を強化する
-- [ ] README以外の構成図・Notion・企画資料を最新状態へ同期する
+- [ ] Notion・企画資料を最新状態へ同期する
 - [x] 約20分の自由閲覧向け展示スライドと、別紙の技術解説を作成する
 - [x] 展示資料PPTXをネイティブGoogle Slidesへ取り込み、実画面を反映する
 - [x] 技術解説DOCXをGoogle Docsへ取り込み、Google Slidesからのリンクを設定する
-- [ ] AWS再構築を行う場合は、承認後に公開E2Eを再確認する
+- [x] CloudFrontサイト、`GET /health`、`GET /demo/report`の200と、未認証APIの401を確認する
+- [ ] Cognitoユーザーによるログイン、保存、再取得の公開E2Eを確認する
 
 ## 関連資料
 
@@ -317,7 +318,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 | [`implementation/docs/operations/anonymized_comparison_backup.md`](implementation/docs/operations/anonymized_comparison_backup.md) | 匿名比較バックアップの保持・復元方針 | 長期バックアップの正本 |
 | [`implementation/terraform/README.md`](implementation/terraform/README.md) | AWS構成、API、Terraform操作 | Apply前の承認が必要 |
 | [`implementation/docs/operations/custom_domain_cloudflare_setup.md`](implementation/docs/operations/custom_domain_cloudflare_setup.md) | 独自サブドメイン再接続手順 | 新しいoutputを正とする |
-| [`materials/architecture/spendops_aws_architecture.drawio`](materials/architecture/spendops_aws_architecture.drawio) | AWS構成図 | 分類ルールDBと削除後状態の同期が必要 |
+| [`materials/architecture/spendops_aws_architecture.drawio`](materials/architecture/spendops_aws_architecture.drawio) | AWS構成図 | 2026-09-02の再構築後状態へ同期済み |
 | [`materials/notion/spendops_dashboard_notion_plan_with_gantt.md`](materials/notion/spendops_dashboard_notion_plan_with_gantt.md) | 7月完成計画 | 一部のAWS削除記録が旧状態 |
 | [`materials/source/app_visual_brief.md`](materials/source/app_visual_brief.md) | ロゴ・画像・発表資料用ブリーフ | 公開継続の記述が削除前状態 |
 | [`materials/deliverables/SpendOps_Dashboard_展示資料.pptx`](materials/deliverables/SpendOps_Dashboard_展示資料.pptx) | 12枚・約20分の自由閲覧向け展示資料 | Google Slidesへ取込済み。5枚目の実画面はGoogle Slides版に反映 |
@@ -336,6 +337,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 2026-07-22: 個別取引保存、年間集計、利用先絞り込み、分類修正、本人別分類学習を実装・公開
 - 2026-07-23: ユーザー承認後にAWS基盤42リソースを削除し、匿名化済み月別集計だけを長期バックアップ
 - 2026-07-23: 展示会形式の約20分自由閲覧を想定した12枚の本編PPTXと、技術解説DOCXを作成。PowerPoint実描画、Open XML構造、70件の自動テストを再確認
+- 2026-09-02: 新しいAWSアカウントへTerraform第1段階を再構築。43リソースを追加し、CloudFront既定ドメイン、API、Cognito、DynamoDB、Lambdaを検証。独自ドメインはACM検証待ち
 
 ## 既存の利用者フィードバック
 

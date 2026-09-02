@@ -1,6 +1,6 @@
 # SpendOps Dashboard 現在コンテキスト
 
-更新日: 2026-08-01（Asia/Tokyo）
+更新日: 2026-09-02（Asia/Tokyo）
 
 通常のリポジトリ作業では、このファイルと`project-guidance/active-guardrails.md`だけを最初に読む。詳細仕様、作業履歴、分野別手順は、依頼に必要な箇所だけ参照する。
 
@@ -24,12 +24,12 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 
 ## 現在状態
 
-- AWS基盤は2026-07-23にTerraform Destroy済み。
-- Terraform stateは0エントリ。
-- 公開サイト、ログイン、クラウド保存、APIは停止中。
-- `implementation/app-site/config.js`は空設定で、ローカル分析だけ利用可能。
-- 直近の記録済みテスト結果はフロント46件、Lambda 24件、合計70件成功。
-- 再構築・公開・AWS変更は、現在のコードから新しいPlanを作り、対象Planへの明示的な実行依頼がある場合だけ行う。
+- AWS基盤は2026-09-02に新しいAWSアカウントへTerraform第1段階を再構築済み。
+- Terraform stateは48エントリ（管理リソース43件、data 5件）で、再Planは差分0。
+- CloudFront既定ドメインの公開サイト、API、Cognito、DynamoDB、Lambdaは稼働中。
+- 独自ドメインはACMのDNS検証待ちで、CloudFront aliasとCloudflare DNSは未変更。
+- 直近の記録済みテスト結果はフロント47件、Lambda 24件、合計71件成功。
+- 第2段階の独自ドメイン有効化・Cloudflare変更・追加AWS変更は、新しいPlanを作り、対象Planへの明示的な実行依頼がある場合だけ行う。
 
 ## 主要パス
 
