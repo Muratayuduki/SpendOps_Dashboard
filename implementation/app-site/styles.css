@@ -37,13 +37,13 @@ button { cursor: pointer; }
 .brand-area { gap: 18px; }
 .brand { gap: 10px; font-size: 13px; }
 .brand-mark { display: block; width: 32px; height: 32px; object-fit: cover; background: white; border-radius: 9px; }
-.topbar-actions { gap: 10px; }
+.topbar-actions { min-width: 0; gap: 10px; }
 .connection { gap: 7px; font-size: 10px; color: rgba(255,255,255,.72); }
 .connection i { width: 7px; height: 7px; border-radius: 50%; background: #dca63a; }
 .connection.is-online i { background: #54d79a; }
 .connection.is-local i { background: var(--lime); }
 .text-button { min-height: 32px; padding: 0 12px; color: white; background: transparent; border: 1px solid rgba(255,255,255,.23); border-radius: 7px; font-size: 10px; font-weight: 800; }
-.auth-status { color: rgba(255,255,255,.62); font-size: 8px; font-weight: 800; }
+.auth-status { min-width: 0; max-width: min(40vw, 260px); overflow: hidden; color: rgba(255,255,255,.62); font-size: 8px; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; }
 .auth-status.is-authenticated { color: var(--lime); }
 .auth-button { min-height: 32px; padding: 0 13px; color: var(--ink); background: var(--lime); border: 0; border-radius: 7px; font-size: 9px; font-weight: 900; }
 .menu-button { display: flex; min-height: 34px; align-items: center; gap: 9px; padding: 0 12px; color: var(--ink); background: var(--lime); border: 0; border-radius: 8px; font-size: 9px; font-weight: 900; }
@@ -298,7 +298,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 @media (max-width: 900px) {
   body { overflow: auto; }
-  .connection, .auth-status, #run-demo { display: none; }
+  .connection, #run-demo { display: none; }
   .workspace, .workspace.is-menu-collapsed { grid-template-columns: 1fr; height: auto; }
   .workspace.is-menu-collapsed .control-panel { display: none; }
   .control-panel, .result-area { min-height: auto; }
@@ -310,7 +310,7 @@ h1, h2, h3, p { margin-top: 0; }
 }
 
 @media (max-width: 540px) {
-  .brand strong, .connection, .auth-status, #run-demo { display: none; }
+  .brand strong, .connection, #run-demo { display: none; }
   .brand-area { gap: 8px; }
   .menu-button { padding: 0 9px; }
   #data-menu-label { display: none; }

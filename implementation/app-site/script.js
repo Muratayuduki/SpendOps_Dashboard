@@ -239,7 +239,9 @@ function renderReport(report, mode = "aws") {
     ? yen.format(summary.monthly_average || 0)
     : hasComparison ? yen.format(comparison.value) : "比較待ち";
   document.querySelector("#comparison-note").textContent = isPeriodSummary ? `${summary.period_month_count || 0}か月の平均` : comparison.note;
-  document.querySelector("#comparison-status").textContent = isPeriodSummary ? `${summary.period_month_count || 0}か月をまとめて表示` : comparison.status;
+  document.querySelector("#comparison-status").textContent = isPeriodSummary
+    ? `${summary.period_month_count || 0}か月をまとめて表示`
+    : comparison.type === "group" && !hasComparison ? "みんなとの比較" : comparison.status;
   document.querySelector("#transaction-count").textContent = `${number.format(summary.transaction_count)}件`;
   document.querySelector("#source-count").textContent = isPeriodSummary ? "期間内のすべて" : "選んだ月の合計";
   document.querySelector("#period-change-label").textContent = isPeriodSummary ? "対象期間" : "前の月から";
@@ -279,14 +281,15 @@ function renderReport(report, mode = "aws") {
     : hasComparison
     ? `${comparison.label}より ${formatRate(summary.difference_rate)}`
     : comparison.type === "group"
-      ? "みんなと比べるための記録を準備中"
+      ? "みんなとの比較"
       : "過去の月がまだ不足";
   if (hasComparison && comparison.type === "personal") {
     comparisonText.textContent = `本人の過去平均より ${formatRate(summary.difference_rate)}`;
   }
 
   const badge = document.querySelector("#dataset-badge");
-  badge.textContent = mode === "local" ? "今回読み込み" : mode === "stored" ? "保存済み" : "お試し表示";
+  badge.hidden = mode === "local";
+  badge.textContent = mode === "stored" ? "保存済み" : mode === "local" ? "" : "お試し表示";
 
   renderBreakdown(report);
   renderTrend(report.trend || [], isPeriodSummary ? null : report.month);
@@ -1812,26 +1815,22 @@ function getGroupBaseline(source, month) {
       label: "同じ条件のみんなの平均",
       value: null,
       note: `比べるにはあと${Math.max(minimumParticipants - participantCount, 0)}人分必要です`,
-      status: `みんなとの比較を準備中・${participantCount}/${minimumParticipants}人`,
+      status: "みんなとの比較",
       categoryAverages: {},
     };
   }
   const monthData = sourceData?.months?.[month];
   const value = monthData?.average_total ?? sourceData?.monthly_average ?? null;
   const participantCount = Number(monthData?.participant_count ?? sourceData?.participant_count ?? 0);
-  const seedProfileCount = Number(sourceData?.cohort?.seed_profile_count ?? 0);
   const eligible = Boolean(sourceData?.eligible && Number.isFinite(Number(value)));
-  const realProgress = realComparison
-    ? `実データ${Number(realComparison.participant_count)}/${Number(realComparison.minimum_participants)}人・`
-    : "";
   return {
     type: "group",
     label: `${sourceLabel}の参考平均`,
     value: eligible ? Number(value) : null,
-    note: eligible ? `${realProgress}参考用の例${participantCount}人分（元にした記録${seedProfileCount}人分）` : "比べるための記録を準備中",
+    note: eligible ? "参考データ（実際の利用者平均ではありません）" : "比べるための記録を準備中",
     status: realComparison
-      ? `みんなとの比較を準備中・${Number(realComparison.participant_count)}/${Number(realComparison.minimum_participants)}人`
-      : eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較を準備中",
+      ? "みんなとの比較"
+      : eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較",
     categoryAverages: eligible ? monthData?.category_averages || sourceData?.category_averages || {} : {},
   };
 }
@@ -2308,7 +2307,8 @@ async function handleAuthChanged(user) {
       message.className = "upload-message is-success";
       setConnection("is-online", "結果を保存済み");
     } else {
-      await loadStoredAccountData(true);
+      const hasStoredData = await loadStoredAccountData(true);
+      if (!hasStoredData && !localAnalysis) resetAnalysisView();
     }
   } catch (_error) {
     message.textContent = shouldSaveLocalAnalysis

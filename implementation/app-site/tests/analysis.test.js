@@ -280,6 +280,7 @@ test("group comparison is default and personal comparison remains selectable", (
   assert.equal(groupReport.comparison.type, "group");
   assert.equal(groupReport.comparison.value, 1500);
   assert.equal(groupReport.comparison.status, "参考例と比較・120人分");
+  assert.equal(groupReport.comparison.note, "参考データ（実際の利用者平均ではありません）");
   assert.equal(personalReport.comparison.type, "personal");
   assert.equal(personalReport.comparison.value, 1000);
 });
