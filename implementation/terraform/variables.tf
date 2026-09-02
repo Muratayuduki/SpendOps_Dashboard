@@ -57,7 +57,7 @@ variable "custom_domain_name" {
 variable "activate_custom_domain" {
   description = "DNS検証後に独自ドメインをCloudFrontとAPIの許可元へ設定する"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "log_retention_days" {

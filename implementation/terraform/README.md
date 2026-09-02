@@ -67,14 +67,15 @@ PayPay、JCB、三井住友VISAのCSVはブラウザ内で解析します。CSV�
 ## 確認手順
 
 ```powershell
-terraform init
-..\lambda\build.ps1
-terraform fmt -check
-terraform validate
-terraform plan -out=spendops.tfplan
+powershell -ExecutionPolicy Bypass -File ..\..\.agents\skills\manage-spendops-terraform\scripts\Invoke-TerraformReadiness.ps1 `
+  -Init -BuildLambda -Plan Apply `
+  -PlanPath spendops-YYYYMMDD-HHMMSS.tfplan `
+  -Variable activate_custom_domain=false
 ```
 
-`terraform apply`は、Planの内容とAWS料金への影響を確認した後に実行してください。現時点ではローカルStateを使うため、複数人または本番運用へ移行する前にS3などのリモートBackendを追加します。
+第1段階では`activate_custom_domain=false`を明示し、毎回新しいPlan名を使用します。`terraform apply`は、Planの内容とAWS料金への影響を確認した後に、承認済みの保存済みPlanだけを適用してください。
+
+現時点ではローカルStateを使います。次回のPlanまたはApply前に、操作者を1人へ直列化し、`terraform.tfstate`の存在と対象AWSアカウントを確認したうえで、Git管理外の`state-backups/`へ回復用コピーを保存してください。複数人または本番運用へ移行する前に、ロックと暗号化を備えたリモートBackendを追加します。
 
 ## APIルート
 
