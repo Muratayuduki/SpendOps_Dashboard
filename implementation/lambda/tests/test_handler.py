@@ -261,12 +261,12 @@ class HandlerTests(unittest.TestCase):
         self.assertIsNone(comparison["average_total"])
         self.assertEqual(comparison["category_averages"], {})
 
-    def test_group_comparison_uses_five_other_users_and_excludes_current(self):
+    def test_group_comparison_uses_five_other_users_across_payment_sources_and_excludes_current(self):
         self.summaries.items = [
             {
                 "user_id": f"other-{index}",
                 "report_month": "2026-06",
-                "source_type": "PAYPAY",
+                "source_type": "PAYPAY" if index % 2 == 0 else "CARD",
                 "total_expense": (index + 1) * 1000,
                 "categories": {"食費": (index + 1) * 1000},
             }
@@ -344,33 +344,32 @@ class HandlerTests(unittest.TestCase):
         self.assertIsNotNone(report)
         self.assertTrue(report["report"]["partial"])
 
-    def test_all_comparison_requires_both_sources_from_five_other_users(self):
+    def test_all_comparison_accepts_five_other_users_with_any_payment_source(self):
         self.summaries.items = [
             {
                 "user_id": f"other-{index}",
                 "report_month": "2026-06",
-                "source_type": source_type,
-                "total_expense": 1000 if source_type == "PAYPAY" else 2000,
-                "categories": {"食費": 1000 if source_type == "PAYPAY" else 2000},
+                "source_type": "PAYPAY" if index % 2 == 0 else "CARD",
+                "total_expense": (index + 1) * 1000,
+                "categories": {"食費": (index + 1) * 1000},
                 "partial": False,
             }
             for index in range(5)
-            for source_type in ("PAYPAY", "CARD")
         ] + [
             {
-                "user_id": "paypay-only",
+                "user_id": "other-0",
                 "report_month": "2026-06",
-                "source_type": "PAYPAY",
-                "total_expense": 99_999,
-                "categories": {"食費": 99_999},
+                "source_type": "CARD",
+                "total_expense": 2000,
+                "categories": {"食費": 2000},
                 "partial": False,
             }
         ]
         comparison = handler.build_group_comparison("2026-06", "ALL", "user-current")
         self.assertTrue(comparison["eligible"])
         self.assertEqual(comparison["participant_count"], 5)
-        self.assertEqual(comparison["average_total"], 3000)
-        self.assertEqual(comparison["category_averages"]["食費"], 3000)
+        self.assertEqual(comparison["average_total"], 3400)
+        self.assertEqual(comparison["category_averages"]["食費"], 3400)
 
     def test_report_list_returns_only_current_user_items(self):
         handler.save_analysis("user-current", valid_payload())

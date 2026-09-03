@@ -39,6 +39,20 @@ global.window = {
           },
         },
       },
+      ALL: {
+        label: "全支払い方法",
+        eligible: true,
+        participant_count: 120,
+        monthly_average: 7000,
+        category_averages: { 食費: 5500, その他: 1500 },
+        months: {
+          "2026-06": {
+            average_total: 7500,
+            participant_count: 120,
+            category_averages: { 食費: 6000, その他: 1500 },
+          },
+        },
+      },
     },
   },
 };
@@ -278,14 +292,15 @@ test("group comparison is default and personal comparison remains selectable", (
   const groupReport = core.buildLocalReport(analysis, "2026-06");
   const personalReport = core.buildLocalReport(analysis, "2026-06", "personal");
   assert.equal(groupReport.comparison.type, "group");
-  assert.equal(groupReport.comparison.value, 1500);
+  assert.equal(groupReport.comparison.value, 7500);
+  assert.equal(groupReport.comparison.label, "全支払い方法の参考平均");
   assert.equal(groupReport.comparison.status, "参考例と比較・120人分");
   assert.equal(groupReport.comparison.note, "参考データ（実際の利用者平均ではありません）");
   assert.equal(personalReport.comparison.type, "personal");
   assert.equal(personalReport.comparison.value, 1000);
 });
 
-test("PayPay and credit-card reports use separate comparison cohorts", () => {
+test("all payment scopes use the same combined comparison cohort", () => {
   const payPay = core.buildLocalAnalysis([
     ["取引日", "出金金額", "取引先"],
     ["2026/06/10", "2000", "店舗A"],
@@ -303,11 +318,15 @@ test("PayPay and credit-card reports use separate comparison cohorts", () => {
   assert.equal(allReport.summary.total_expense, 9000);
   assert.deepEqual(allReport.sources.map((source) => source.name).sort(), ["JCB", "PayPay"]);
   assert.equal(allReport.sources.reduce((sum, source) => sum + source.amount, 0), 9000);
-  assert.equal(allReport.comparison.value, null);
+  assert.equal(allReport.comparison.value, 7500);
+  assert.equal(allReport.comparison.status, "参考例と比較・120人分");
+  assert.equal(allReport.comparison.note, "参考データ（実際の利用者平均ではありません）");
   assert.equal(payPayReport.summary.total_expense, 2000);
-  assert.equal(payPayReport.comparison.value, 1500);
+  assert.equal(payPayReport.comparison.value, 7500);
+  assert.equal(payPayReport.comparison.label, "全支払い方法の参考平均");
   assert.equal(cardReport.summary.total_expense, 7000);
-  assert.equal(cardReport.comparison.value, 6000);
+  assert.equal(cardReport.comparison.value, 7500);
+  assert.equal(cardReport.comparison.label, "全支払い方法の参考平均");
   assert.equal(cardReport.categories[0].name, "食費");
   assert.equal(cardReport.transactions[0].merchant, "セブン－イレブン");
   assert.equal("dedupKey" in cardReport.transactions[0], false);

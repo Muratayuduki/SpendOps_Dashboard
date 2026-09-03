@@ -7,13 +7,14 @@ global.window = {};
 require("../comparison-data.js");
 const core = require("../script.js");
 
-test("generated comparison data contains separate aggregate-only payment cohorts", () => {
+test("generated comparison data contains a combined aggregate-only cohort", () => {
   const comparison = global.window.SPENDOPS_COMPARISON_DATA;
   const serialized = JSON.stringify(comparison);
   assert.equal(comparison.dataset, "synthetic-payment-cohorts-v1");
   assert.equal(comparison.participant_count, 120);
   assert.equal(comparison.sources.PAYPAY.participant_count, 120);
   assert.equal(comparison.sources.CARD.participant_count, 120);
+  assert.equal(comparison.sources.ALL.participant_count, 120);
   assert.equal(comparison.sources.PAYPAY.cohort.seed_profile_count, 1);
   assert.equal(comparison.sources.CARD.cohort.seed_profile_count, 2);
   assert.equal(Object.values(comparison.sources.PAYPAY.months).every((month) => month.participant_count === 120), true);
@@ -41,7 +42,7 @@ test("repository PayPay data defaults to group comparison with personal mode ava
   assert.equal(Number.isFinite(personalReport.comparison.value), true);
 });
 
-test("repository card data uses the card-only comparison cohort", () => {
+test("repository card data uses the combined comparison cohort", () => {
   const directory = path.resolve(__dirname, "..", "..", "csv", "jcb");
   const fileName = fs.readdirSync(directory).find((name) => name.toLowerCase().endsWith(".csv"));
   const bytes = fs.readFileSync(path.join(directory, fileName));
@@ -49,6 +50,7 @@ test("repository card data uses the card-only comparison cohort", () => {
   const analysis = core.buildLocalAnalysis(core.parseCsv(core.decodeCsv(buffer).text), fileName);
   const report = core.buildLocalReport(analysis, analysis.defaultMonth);
   assert.equal(report.comparison.status, "参考例と比較・120人分");
+  assert.equal(report.comparison.label, "全支払い方法の参考平均");
   assert.equal(report.categories.some((category) => category.name.includes("ショッピング取組")), false);
 });
 

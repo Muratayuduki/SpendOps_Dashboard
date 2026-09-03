@@ -598,9 +598,6 @@ def build_group_comparison(month: str, source_type: str, excluded_user_id: str) 
         "ProjectionExpression": "#user_id, #source_type, total_expense, categories",
     }
     request["ExpressionAttributeNames"]["#source_type"] = "source_type"
-    if source_type != "ALL":
-        request["FilterExpression"] += " AND #source_type = :source_type"
-        request["ExpressionAttributeValues"][":source_type"] = source_type
     while True:
         response = table.scan(**request)
         items.extend(response.get("Items", []))
@@ -609,17 +606,10 @@ def build_group_comparison(month: str, source_type: str, excluded_user_id: str) 
             break
         request["ExclusiveStartKey"] = last_key
 
-    if source_type == "ALL":
-        by_user: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
-        for item in items:
-            by_user[str(item["user_id"])][str(item.get("source_type", ""))] = item
-        participant_items = [
-            [sources["PAYPAY"], sources["CARD"]]
-            for sources in by_user.values()
-            if "PAYPAY" in sources and "CARD" in sources
-        ]
-    else:
-        participant_items = [[item] for item in items]
+    by_user: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for item in items:
+        by_user[str(item["user_id"])].append(item)
+    participant_items = list(by_user.values())
 
     participant_count = len(participant_items)
     base = {

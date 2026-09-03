@@ -95,4 +95,4 @@ powershell -ExecutionPolicy Bypass -File ..\..\.agents\skills\manage-spendops-te
 - `GET /admin/imports`: 管理者向け取込状況取得
 - `DELETE /users/me`: 退会処理
 
-公開ルートは合成データだけを返します。それ以外はCognitoのJWT認証を必須とします。管理者ルートはCognitoの`admins`グループを確認し、匿名比較は本人と暫定月を除く他5人以上の月別集計がある場合だけ実平均を返します。
+公開ルートは合成データだけを返します。それ以外はCognitoのJWT認証を必須とします。管理者ルートはCognitoの`admins`グループを確認し、匿名比較は本人を除く同月の`partial=false`の月別集計がユニーク利用者5人以上にある場合だけ実平均を返します。支払い種別は条件にせず、同じ利用者の複数種別は合算して1人として扱います。

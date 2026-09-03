@@ -1794,29 +1794,17 @@ function paymentScopeLabel(scope) {
 
 function getGroupBaseline(source, month) {
   const sourceKey = paymentScopeForSource(source);
-  const sourceData = comparisonData?.sources?.[sourceKey] || comparisonData?.sources?.ALL;
+  const sourceData = comparisonData?.sources?.ALL || comparisonData?.sources?.[sourceKey];
   const realComparison = cloudComparisons.get(`${month}#${sourceKey}`);
   const sourceLabel = sourceData?.label || paymentScopeLabel(sourceKey);
   if (realComparison?.eligible && Number.isFinite(Number(realComparison.average_total))) {
     return {
       type: "group",
-      label: "同じ条件のみんなの平均",
+      label: "みんなの月平均",
       value: Number(realComparison.average_total),
       note: `${Number(realComparison.participant_count)}人分を、個人が分からない形でまとめています`,
       status: `みんなとの比較・${Number(realComparison.participant_count)}人`,
       categoryAverages: realComparison.category_averages || {},
-    };
-  }
-  if (sourceKey === "ALL") {
-    const participantCount = Number(realComparison?.participant_count || 0);
-    const minimumParticipants = Number(realComparison?.minimum_participants || 5);
-    return {
-      type: "group",
-      label: "同じ条件のみんなの平均",
-      value: null,
-      note: `比べるにはあと${Math.max(minimumParticipants - participantCount, 0)}人分必要です`,
-      status: "みんなとの比較",
-      categoryAverages: {},
     };
   }
   const monthData = sourceData?.months?.[month];
@@ -1828,9 +1816,7 @@ function getGroupBaseline(source, month) {
     label: `${sourceLabel}の参考平均`,
     value: eligible ? Number(value) : null,
     note: eligible ? "参考データ（実際の利用者平均ではありません）" : "比べるための記録を準備中",
-    status: realComparison
-      ? "みんなとの比較"
-      : eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較",
+    status: eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較",
     categoryAverages: eligible ? monthData?.category_averages || sourceData?.category_averages || {} : {},
   };
 }
