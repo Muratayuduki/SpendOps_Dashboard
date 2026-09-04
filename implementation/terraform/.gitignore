@@ -1,4 +1,5 @@
 .terraform/
+state-backups/
 *.tfstate
 *.tfstate.*
 *.tfplan

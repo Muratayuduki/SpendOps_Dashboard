@@ -7,13 +7,14 @@ global.window = {};
 require("../comparison-data.js");
 const core = require("../script.js");
 
-test("generated comparison data contains separate aggregate-only payment cohorts", () => {
+test("generated comparison data contains a combined aggregate-only cohort", () => {
   const comparison = global.window.SPENDOPS_COMPARISON_DATA;
   const serialized = JSON.stringify(comparison);
   assert.equal(comparison.dataset, "synthetic-payment-cohorts-v1");
   assert.equal(comparison.participant_count, 120);
   assert.equal(comparison.sources.PAYPAY.participant_count, 120);
   assert.equal(comparison.sources.CARD.participant_count, 120);
+  assert.equal(comparison.sources.ALL.participant_count, 120);
   assert.equal(comparison.sources.PAYPAY.cohort.seed_profile_count, 1);
   assert.equal(comparison.sources.CARD.cohort.seed_profile_count, 2);
   assert.equal(Object.values(comparison.sources.PAYPAY.months).every((month) => month.participant_count === 120), true);
@@ -41,7 +42,7 @@ test("repository PayPay data defaults to group comparison with personal mode ava
   assert.equal(Number.isFinite(personalReport.comparison.value), true);
 });
 
-test("repository card data uses the card-only comparison cohort", () => {
+test("repository card data uses the combined comparison cohort", () => {
   const directory = path.resolve(__dirname, "..", "..", "csv", "jcb");
   const fileName = fs.readdirSync(directory).find((name) => name.toLowerCase().endsWith(".csv"));
   const bytes = fs.readFileSync(path.join(directory, fileName));
@@ -49,6 +50,7 @@ test("repository card data uses the card-only comparison cohort", () => {
   const analysis = core.buildLocalAnalysis(core.parseCsv(core.decodeCsv(buffer).text), fileName);
   const report = core.buildLocalReport(analysis, analysis.defaultMonth);
   assert.equal(report.comparison.status, "参考例と比較・120人分");
+  assert.equal(report.comparison.label, "全支払い方法の参考平均");
   assert.equal(report.categories.some((category) => category.name.includes("ショッピング取組")), false);
 });
 
@@ -102,10 +104,52 @@ test("single-screen markup has every element required by the script", () => {
   assert.match(html, /id="all-scope"/);
   assert.match(html, />まとめて</);
   assert.match(html, /id="data-menu-toggle"/);
-  assert.match(html, /みんなと比べる/);
-  assert.match(html, /自分の過去と比べる/);
+  assert.match(html, /みんなの月平均/);
+  assert.match(html, /他5人以上の完全月/);
+  assert.match(html, /自分の過去平均/);
+  assert.match(html, /最大12か月の平均/);
+  assert.match(html, /<span class="switch-label">比較法<\/span>/);
+  assert.match(html, /role="group" aria-label="比較法"/);
+  assert.match(html, /id="personal-mode"[^>]*aria-pressed="false"/);
+  assert.match(html, /class="comparison-card-state"[^>]*aria-hidden="true"/);
+  assert.match(html, /id="comparison-result"[^>]*aria-labelledby="comparison-result-heading"/);
+  assert.match(html, /id="comparison-result-heading">比較対象：みんなの月平均/);
+  assert.doesNotMatch(html, /id="comparison-target"/);
+  assert.match(css, /\.comparison-switch \{[^}]*gap:\s*6px[^}]*background:\s*transparent/s);
+  assert.match(css, /\.metric-comparison \{[^}]*border-color:\s*var\(--line\)[^}]*box-shadow:\s*none/s);
+  assert.match(css, /\.comparison-difference \{[^}]*background:\s*#f0f2ee[^}]*border-left:\s*3px solid var\(--ink\)/s);
+  assert.match(css, /\.comparison-switch button\.is-active \{[^}]*border:\s*2px solid var\(--ink\)/s);
+  assert.match(css, /\.comparison-switch button:focus-visible/);
+  assert.match(css, /\.comparison-card-copy strong \{[^}]*font-size:\s*12px/s);
+  assert.match(css, /\.metric > span \{[^}]*font-size:\s*11px/s);
+  assert.match(css, /\.result-content \{[^}]*grid-template-rows:\s*auto auto minmax\(270px, 1fr\) auto/s);
+  assert.doesNotMatch(css, /\.analysis-grid \{[^}]*height:\s*clamp\(270px, 34vh, 340px\)/s);
+  assert.doesNotMatch(html, /NEXT ACTION/);
+  assert.match(css, /\.panel-heading h3 \{[^}]*font-size:\s*16px/s);
+  assert.match(css, /\.insight-content \{[^}]*grid-auto-rows:\s*minmax\(0, 1fr\)/s);
+  assert.match(css, /\.insight-row \{[^}]*align-items:\s*center[^}]*font-size:\s*13px/s);
+  assert.match(css, /\.category-layout \{[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\)[^}]*justify-items:\s*center/s);
+  assert.match(css, /\.donut \{[^}]*width:\s*156px[^}]*height:\s*156px/s);
+  assert.match(css, /\.category-list \{[^}]*align-content:\s*space-evenly[^}]*gap:\s*5px/s);
+  assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.analysis-grid \{[^}]*height:\s*auto/s);
+  assert.match(css, /@media \(max-width: 540px\)[\s\S]*\.comparison-switch button \{[^}]*min-width:\s*0/s);
+  assert.match(script, /`比較対象：\$\{comparisonTarget\}`/);
+  assert.match(script, /`\$\{comparisonTarget\}との差：\$\{formatRate\(summary\.difference_rate\)\}`/);
+  assert.match(script, /\.comparison-card-state span/);
   assert.match(html, /id="open-transactions"/);
   assert.match(html, /id="open-category-review"/);
+  assert.match(html, /id="open-transactions"[^>]*>支払い明細</);
+  assert.match(html, /id="open-category-review"[^>]*>分類修正</);
+  assert.match(html, /class="detail-actions"[^>]*id="detail-actions"[^>]*aria-label="明細の確認と修正"[^>]*hidden/);
+  assert.match(html, /class="heading-status-summary"[\s\S]*id="dataset-badge"[\s\S]*id="comparison-status"/);
+  assert.match(css, /\.result-heading \{[^}]*display:\s*grid[^}]*gap:\s*12px/s);
+  assert.match(css, /\.comparison-switch \{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/s);
+  assert.match(css, /\.comparison-switch button \{[^}]*width:\s*100%[^}]*min-width:\s*0/s);
+  assert.match(css, /\.detail-actions \{[^}]*justify-self:\s*end[^}]*gap:\s*6px/s);
+  assert.match(css, /\.detail-button \{[^}]*min-width:\s*84px[^}]*min-height:\s*38px/s);
+  assert.match(html, /id="transaction-title">支払い明細</);
+  assert.doesNotMatch(html, /支払い明細・使いみちの編集/);
+  assert.match(script, /comparisonStatus\.hidden = !isPeriodSummary && comparison\.status\?\.startsWith\("参考例と比較"\)/);
   assert.match(html, /id="category-review-dialog"/);
   assert.match(html, /id="category-review-filter"/);
   assert.match(html, /id="save-category-review"/);
@@ -144,4 +188,7 @@ test("single-screen markup has every element required by the script", () => {
   const reportPanel = html.slice(html.indexOf('class="result-area"'), html.indexOf('id="transaction-dialog"'));
   assert.doesNotMatch(uploadPanel, /id="month-select"/);
   assert.match(reportPanel, /id="month-select"/);
+  assert.equal(reportPanel.indexOf('id="dashboard-title"') < reportPanel.indexOf('id="report-period-control"'), true);
+  assert.equal(reportPanel.indexOf('id="report-period-control"') < reportPanel.indexOf('id="comparison-control"'), true);
+  assert.equal(reportPanel.indexOf('id="comparison-control"') < reportPanel.indexOf('id="detail-actions"'), true);
 });

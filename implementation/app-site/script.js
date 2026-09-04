@@ -234,12 +234,21 @@ function renderReport(report, mode = "aws") {
   document.querySelector("#report-month").textContent = formatMonth(report.month);
   document.querySelector("#total-expense").textContent = yen.format(summary.total_expense);
   document.querySelector("#total-expense-label").textContent = isPeriodSummary ? "期間内の支出" : "今月の支出";
-  document.querySelector("#comparison-label").textContent = isPeriodSummary ? "1か月あたり" : comparison.label;
+  const comparisonTarget = isPeriodSummary
+    ? "1か月あたり"
+    : comparison.type === "personal" ? "自分の過去平均" : "みんなの月平均";
+  document.querySelector("#comparison-result-heading").textContent = isPeriodSummary
+    ? "表示内容：期間の月平均"
+    : `比較対象：${comparisonTarget}`;
   document.querySelector("#comparison-value").textContent = isPeriodSummary
     ? yen.format(summary.monthly_average || 0)
     : hasComparison ? yen.format(comparison.value) : "比較待ち";
   document.querySelector("#comparison-note").textContent = isPeriodSummary ? `${summary.period_month_count || 0}か月の平均` : comparison.note;
-  document.querySelector("#comparison-status").textContent = isPeriodSummary ? `${summary.period_month_count || 0}か月をまとめて表示` : comparison.status;
+  const comparisonStatus = document.querySelector("#comparison-status");
+  comparisonStatus.textContent = isPeriodSummary
+    ? `${summary.period_month_count || 0}か月をまとめて表示`
+    : comparison.type === "group" && !hasComparison ? "みんなとの比較" : comparison.status;
+  comparisonStatus.hidden = !isPeriodSummary && comparison.status?.startsWith("参考例と比較");
   document.querySelector("#transaction-count").textContent = `${number.format(summary.transaction_count)}件`;
   document.querySelector("#source-count").textContent = isPeriodSummary ? "期間内のすべて" : "選んだ月の合計";
   document.querySelector("#period-change-label").textContent = isPeriodSummary ? "対象期間" : "前の月から";
@@ -270,23 +279,23 @@ function renderReport(report, mode = "aws") {
   donutTotal.classList.toggle("is-long", fullYen.length >= 10);
   donutTotal.classList.toggle("is-very-long", fullYen.length >= 14);
   renderInsight(report.insight);
-  document.querySelector("#open-transactions").hidden = !Array.isArray(report.transactions) || !report.transactions.length;
-  document.querySelector("#open-category-review").hidden = !Array.isArray(report.transactions) || !report.transactions.length;
+  const hasTransactions = Array.isArray(report.transactions) && report.transactions.length > 0;
+  document.querySelector("#detail-actions").hidden = !hasTransactions;
+  document.querySelector("#open-transactions").hidden = !hasTransactions;
+  document.querySelector("#open-category-review").hidden = !hasTransactions;
 
   const comparisonText = document.querySelector("#average-comparison");
   comparisonText.textContent = isPeriodSummary
     ? "月ごとの違いは棒グラフで確認できます"
     : hasComparison
-    ? `${comparison.label}より ${formatRate(summary.difference_rate)}`
+    ? `${comparisonTarget}との差：${formatRate(summary.difference_rate)}`
     : comparison.type === "group"
-      ? "みんなと比べるための記録を準備中"
+      ? "みんなとの比較"
       : "過去の月がまだ不足";
-  if (hasComparison && comparison.type === "personal") {
-    comparisonText.textContent = `本人の過去平均より ${formatRate(summary.difference_rate)}`;
-  }
 
   const badge = document.querySelector("#dataset-badge");
-  badge.textContent = mode === "local" ? "今回読み込み" : mode === "stored" ? "保存済み" : "お試し表示";
+  badge.hidden = mode === "local";
+  badge.textContent = mode === "stored" ? "保存済み" : mode === "local" ? "" : "お試し表示";
 
   renderBreakdown(report);
   renderTrend(report.trend || [], isPeriodSummary ? null : report.month);
@@ -1791,47 +1800,29 @@ function paymentScopeLabel(scope) {
 
 function getGroupBaseline(source, month) {
   const sourceKey = paymentScopeForSource(source);
-  const sourceData = comparisonData?.sources?.[sourceKey] || comparisonData?.sources?.ALL;
+  const sourceData = comparisonData?.sources?.ALL || comparisonData?.sources?.[sourceKey];
   const realComparison = cloudComparisons.get(`${month}#${sourceKey}`);
   const sourceLabel = sourceData?.label || paymentScopeLabel(sourceKey);
   if (realComparison?.eligible && Number.isFinite(Number(realComparison.average_total))) {
     return {
       type: "group",
-      label: "同じ条件のみんなの平均",
+      label: "みんなの月平均",
       value: Number(realComparison.average_total),
       note: `${Number(realComparison.participant_count)}人分を、個人が分からない形でまとめています`,
       status: `みんなとの比較・${Number(realComparison.participant_count)}人`,
       categoryAverages: realComparison.category_averages || {},
     };
   }
-  if (sourceKey === "ALL") {
-    const participantCount = Number(realComparison?.participant_count || 0);
-    const minimumParticipants = Number(realComparison?.minimum_participants || 5);
-    return {
-      type: "group",
-      label: "同じ条件のみんなの平均",
-      value: null,
-      note: `比べるにはあと${Math.max(minimumParticipants - participantCount, 0)}人分必要です`,
-      status: `みんなとの比較を準備中・${participantCount}/${minimumParticipants}人`,
-      categoryAverages: {},
-    };
-  }
   const monthData = sourceData?.months?.[month];
   const value = monthData?.average_total ?? sourceData?.monthly_average ?? null;
   const participantCount = Number(monthData?.participant_count ?? sourceData?.participant_count ?? 0);
-  const seedProfileCount = Number(sourceData?.cohort?.seed_profile_count ?? 0);
   const eligible = Boolean(sourceData?.eligible && Number.isFinite(Number(value)));
-  const realProgress = realComparison
-    ? `実データ${Number(realComparison.participant_count)}/${Number(realComparison.minimum_participants)}人・`
-    : "";
   return {
     type: "group",
     label: `${sourceLabel}の参考平均`,
     value: eligible ? Number(value) : null,
-    note: eligible ? `${realProgress}参考用の例${participantCount}人分（元にした記録${seedProfileCount}人分）` : "比べるための記録を準備中",
-    status: realComparison
-      ? `みんなとの比較を準備中・${Number(realComparison.participant_count)}/${Number(realComparison.minimum_participants)}人`
-      : eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較を準備中",
+    note: eligible ? "参考データ（実際の利用者平均ではありません）" : "比べるための記録を準備中",
+    status: eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較",
     categoryAverages: eligible ? monthData?.category_averages || sourceData?.category_averages || {} : {},
   };
 }
@@ -2308,7 +2299,8 @@ async function handleAuthChanged(user) {
       message.className = "upload-message is-success";
       setConnection("is-online", "結果を保存済み");
     } else {
-      await loadStoredAccountData(true);
+      const hasStoredData = await loadStoredAccountData(true);
+      if (!hasStoredData && !localAnalysis) resetAnalysisView();
     }
   } catch (_error) {
     message.textContent = shouldSaveLocalAnalysis
@@ -2545,6 +2537,8 @@ function setComparisonMode(mode, rerender = true) {
   personalButton.classList.toggle("is-active", mode === "personal");
   groupButton.setAttribute("aria-pressed", String(mode === "group"));
   personalButton.setAttribute("aria-pressed", String(mode === "personal"));
+  groupButton.querySelector(".comparison-card-state span").textContent = mode === "group" ? "選択中" : "選択する";
+  personalButton.querySelector(".comparison-card-state span").textContent = mode === "personal" ? "選択中" : "選択する";
   if (rerender && (localAnalysis || storedAnalysisData?.length)) {
     animateComparisonTransition();
     renderLocalMonth();

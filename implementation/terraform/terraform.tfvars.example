@@ -14,7 +14,7 @@ allowed_origins = [
 
 # Cloudflareで管理する公開用サブドメイン。証明書のDNS検証完了後に有効化する。
 custom_domain_name    = "cache.yuduki0303.com"
-activate_custom_domain = true
+activate_custom_domain = false
 
 log_retention_days = 30
 protect_persistent_data = true

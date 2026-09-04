@@ -60,6 +60,23 @@ function getSessionUser() {
   };
 }
 
+function maskEmailAddress(email) {
+  const normalized = String(email || "").trim().toLowerCase();
+  const separatorIndex = normalized.lastIndexOf("@");
+  if (separatorIndex <= 0 || separatorIndex === normalized.length - 1) return "";
+
+  const localPart = normalized.slice(0, separatorIndex);
+  const domain = normalized.slice(separatorIndex + 1);
+  const visibleLength = Math.min(2, localPart.length);
+  const maskLength = Math.max(4, localPart.length - visibleLength);
+  return `${localPart.slice(0, visibleLength)}${"*".repeat(maskLength)}@${domain}`;
+}
+
+function authenticatedUserLabel(user) {
+  const maskedEmail = maskEmailAddress(user?.email);
+  return maskedEmail ? `${maskedEmail} でログイン中` : "ログイン中";
+}
+
 function authIsConfigured() {
   return Boolean(cognitoRegion && cognitoClientId && authApiBaseUrl);
 }
@@ -233,7 +250,8 @@ function updateAuthUi() {
   document.querySelector("#auth-open").hidden = Boolean(user);
   document.querySelector("#auth-logout").hidden = !user;
   document.querySelector("#load-saved").hidden = !user;
-  document.querySelector("#auth-status").textContent = user ? "ログイン済み・結果を保存" : "未ログイン・この画面だけに表示";
+  document.querySelector("#run-demo").hidden = Boolean(user);
+  document.querySelector("#auth-status").textContent = user ? authenticatedUserLabel(user) : "未ログイン・この画面だけに表示";
   document.querySelector("#auth-status").classList.toggle("is-authenticated", Boolean(user));
 }
 
@@ -365,6 +383,8 @@ async function initializeAuthUi() {
 authWindow.SpendOpsAuth = {
   authIsConfigured,
   decodeJwt,
+  maskEmailAddress,
+  authenticatedUserLabel,
   getSessionUser,
   getValidIdToken,
   signUp,

@@ -1,0 +1,256 @@
+meta:
+  profile: engineering-review
+  theme: tech-blue
+  source: edited
+  layout: horizontal
+  routing: orthogonal
+  canvas: auto
+  title: SpendOps Dashboard AWS構成図
+  description: CSVのブラウザ内解析、静的サイト配信、認証、API、保存、監視、および未有効の独自ドメイン経路。
+modules:
+  - id: client
+    label: 利用者端末（AWS外）
+    color: '#F8FAFC'
+  - id: edge
+    label: AWS グローバル / エッジ
+    color: '#FFF7ED'
+  - id: tokyo
+    label: AWS ap-northeast-1（東京）
+    color: '#EFF6FF'
+  - id: pending_domain
+    label: 独自ドメイン経路（未有効）
+    color: '#F3F4F6'
+nodes:
+  - id: csv
+    label: |-
+      PayPay / JCB / 三井住友VISA CSV
+      原本・ファイル名は端末内のみ
+    type: document
+    module: client
+    size: xl
+    position:
+      x: 160
+      'y': 280
+  - id: browser
+    label: |-
+      Webブラウザ
+      CSV解析・正規化・月別表示
+    type: service
+    module: client
+    size: xl
+    position:
+      x: 400
+      'y': 280
+  - id: cloudfront
+    label: |-
+      CloudFront
+      既定ドメインで稼働中
+    type: service
+    module: edge
+    icon: aws.cloudfront
+    size: xl
+    position:
+      x: 672
+      'y': 280
+  - id: s3
+    label: |-
+      Amazon S3
+      非公開の静的Web資産
+      SSE-S3
+    type: database
+    module: tokyo
+    icon: aws.s3
+    size: xl
+    position:
+      x: 944
+      'y': 280
+  - id: cognito
+    label: |-
+      Amazon Cognito
+      User Pool / Client
+      users・admins
+    type: user
+    module: tokyo
+    size: xl
+    position:
+      x: 944
+      'y': 440
+  - id: api
+    label: |-
+      Amazon API Gateway
+      HTTP API
+      公開 / JWT必須ルート
+    type: service
+    module: tokyo
+    size: xl
+    position:
+      x: 944
+      'y': 600
+  - id: lambda
+    label: |-
+      AWS Lambda（単一API）
+      検証・保存・月別集計・匿名比較
+    type: service
+    module: tokyo
+    icon: aws.lambda
+    size: xl
+    position:
+      x: 1216
+      'y': 600
+  - id: dynamodb
+    label: |-
+      Amazon DynamoDB（4テーブル）
+      transactions
+      user_monthly_summaries
+      import_batches / category_rules
+      暗号化・本人IDで分離
+    type: database
+    module: tokyo
+    icon: aws.dynamodb
+    size: xl
+    position:
+      x: 1488
+      'y': 600
+  - id: cloudwatch_api
+    label: |-
+      Amazon CloudWatch Logs
+      APIアクセスログ
+      本文・取引内容は記録しない
+    type: document
+    module: tokyo
+    size: xl
+    position:
+      x: 1216
+      'y': 280
+  - id: cloudwatch_lambda
+    label: |-
+      Amazon CloudWatch Logs
+      Lambda実行ログ
+      本文・取引内容は記録しない
+    type: document
+    module: tokyo
+    size: xl
+    position:
+      x: 1488
+      'y': 280
+  - id: iam
+    label: |-
+      AWS IAM 実行ロール
+      CloudWatch書込み
+      4テーブル限定アクセス
+    type: service
+    module: tokyo
+    size: xl
+    position:
+      x: 1216
+      'y': 440
+  - id: cloudflare
+    label: |-
+      Cloudflare DNS
+      Terraform管理外
+      CNAME未設定
+    type: cloud
+    module: pending_domain
+    size: xl
+    position:
+      x: 672
+      'y': 880
+    style:
+      fillColor: '#F9FAFB'
+      strokeColor: '#6B7280'
+      fontColor: '#4B5563'
+  - id: acm
+    label: |-
+      AWS Certificate Manager
+      us-east-1
+      DNS検証待ち
+    type: service
+    module: pending_domain
+    size: xl
+    position:
+      x: 944
+      'y': 880
+    style:
+      fillColor: '#F9FAFB'
+      strokeColor: '#6B7280'
+      fontColor: '#4B5563'
+edges:
+  - from: csv
+    to: browser
+    type: primary
+    label: 端末内で解析・正規化
+  - from: browser
+    to: cloudfront
+    type: primary
+    label: HTTPSでWebアプリ取得
+  - from: cloudfront
+    to: s3
+    type: primary
+    label: OAC / SigV4 / GetObject
+  - from: browser
+    to: cognito
+    type: bidirectional
+    label: 登録・認証 / JWT
+  - from: cognito
+    to: api
+    type: dependency
+    label: JWT Authorizer
+  - from: browser
+    to: api
+    type: primary
+    label: JWT + 正規化済みデータ
+  - from: api
+    to: lambda
+    type: primary
+    label: Lambda統合
+  - from: lambda
+    to: dynamodb
+    type: data
+    label: 保存・取得・集計
+  - from: api
+    to: cloudwatch_api
+    type: data
+    label: アクセスログ
+    waypoints:
+      - x: 1080
+        'y': 520
+      - x: 1080
+        'y': 200
+      - x: 1216
+        'y': 200
+  - from: lambda
+    to: cloudwatch_lambda
+    type: data
+    label: 実行ログ
+    waypoints:
+      - x: 1336
+        'y': 520
+      - x: 1336
+        'y': 200
+      - x: 1488
+        'y': 200
+  - from: iam
+    to: lambda
+    type: dependency
+    label: 最小権限
+  - from: cloudflare
+    to: acm
+    type: optional
+    label: DNS検証CNAME（未設定）
+    style:
+      strokeColor: '#6B7280'
+      dashed: true
+  - from: acm
+    to: cloudfront
+    type: optional
+    label: 証明書・alias（未有効）
+    style:
+      strokeColor: '#6B7280'
+      dashed: true
+    waypoints:
+      - x: 944
+        'y': 800
+      - x: 536
+        'y': 800
+      - x: 536
+        'y': 280

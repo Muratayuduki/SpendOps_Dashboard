@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "title": "SpendOps Dashboard AWS構成図",
+  "type": "engineering-diagram",
+  "source": "edited",
+  "profile": "engineering-review",
+  "theme": "tech-blue",
+  "layout": "horizontal",
+  "counts": {
+    "nodes": 13,
+    "edges": 13,
+    "modules": 4
+  },
+  "nodes": [
+    {
+      "id": "csv",
+      "label": "PayPay / JCB / 三井住友VISA CSV\n原本・ファイル名は端末内のみ",
+      "type": "document",
+      "module": "client",
+      "size": "xl"
+    },
+    {
+      "id": "browser",
+      "label": "Webブラウザ\nCSV解析・正規化・月別表示",
+      "type": "service",
+      "module": "client",
+      "size": "xl"
+    },
+    {
+      "id": "cloudfront",
+      "label": "CloudFront\n既定ドメインで稼働中",
+      "type": "service",
+      "module": "edge",
+      "icon": "aws.cloudfront",
+      "size": "xl"
+    },
+    {
+      "id": "s3",
+      "label": "Amazon S3\n非公開の静的Web資産\nSSE-S3",
+      "type": "database",
+      "module": "tokyo",
+      "icon": "aws.s3",
+      "size": "xl"
+    },
+    {
+      "id": "cognito",
+      "label": "Amazon Cognito\nUser Pool / Client\nusers・admins",
+      "type": "user",
+      "module": "tokyo",
+      "size": "xl"
+    },
+    {
+      "id": "api",
+      "label": "Amazon API Gateway\nHTTP API\n公開 / JWT必須ルート",
+      "type": "service",
+      "module": "tokyo",
+      "size": "xl"
+    },
+    {
+      "id": "lambda",
+      "label": "AWS Lambda（単一API）\n検証・保存・月別集計・匿名比較",
+      "type": "service",
+      "module": "tokyo",
+      "icon": "aws.lambda",
+      "size": "xl"
+    },
+    {
+      "id": "dynamodb",
+      "label": "Amazon DynamoDB（4テーブル）\ntransactions\nuser_monthly_summaries\nimport_batches / category_rules\n暗号化・本人IDで分離",
+      "type": "database",
+      "module": "tokyo",
+      "icon": "aws.dynamodb",
+      "size": "xl"
+    },
+    {
+      "id": "cloudwatch_api",
+      "label": "Amazon CloudWatch Logs\nAPIアクセスログ\n本文・取引内容は記録しない",
+      "type": "document",
+      "module": "tokyo",
+      "size": "xl"
+    },
+    {
+      "id": "cloudwatch_lambda",
+      "label": "Amazon CloudWatch Logs\nLambda実行ログ\n本文・取引内容は記録しない",
+      "type": "document",
+      "module": "tokyo",
+      "size": "xl"
+    },
+    {
+      "id": "iam",
+      "label": "AWS IAM 実行ロール\nCloudWatch書込み\n4テーブル限定アクセス",
+      "type": "service",
+      "module": "tokyo",
+      "size": "xl"
+    },
+    {
+      "id": "cloudflare",
+      "label": "Cloudflare DNS\nTerraform管理外\nCNAME未設定",
+      "type": "cloud",
+      "module": "pending_domain",
+      "size": "xl"
+    },
+    {
+      "id": "acm",
+      "label": "AWS Certificate Manager\nus-east-1\nDNS検証待ち",
+      "type": "service",
+      "module": "pending_domain",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "csv",
+      "to": "browser",
+      "type": "primary",
+      "label": "端末内で解析・正規化"
+    },
+    {
+      "id": "edge-2",
+      "from": "browser",
+      "to": "cloudfront",
+      "type": "primary",
+      "label": "HTTPSでWebアプリ取得"
+    },
+    {
+      "id": "edge-3",
+      "from": "cloudfront",
+      "to": "s3",
+      "type": "primary",
+      "label": "OAC / SigV4 / GetObject"
+    },
+    {
+      "id": "edge-4",
+      "from": "browser",
+      "to": "cognito",
+      "type": "bidirectional",
+      "label": "登録・認証 / JWT"
+    },
+    {
+      "id": "edge-5",
+      "from": "cognito",
+      "to": "api",
+      "type": "dependency",
+      "label": "JWT Authorizer"
+    },
+    {
+      "id": "edge-6",
+      "from": "browser",
+      "to": "api",
+      "type": "primary",
+      "label": "JWT + 正規化済みデータ"
+    },
+    {
+      "id": "edge-7",
+      "from": "api",
+      "to": "lambda",
+      "type": "primary",
+      "label": "Lambda統合"
+    },
+    {
+      "id": "edge-8",
+      "from": "lambda",
+      "to": "dynamodb",
+      "type": "data",
+      "label": "保存・取得・集計"
+    },
+    {
+      "id": "edge-9",
+      "from": "api",
+      "to": "cloudwatch_api",
+      "type": "data",
+      "label": "アクセスログ"
+    },
+    {
+      "id": "edge-10",
+      "from": "lambda",
+      "to": "cloudwatch_lambda",
+      "type": "data",
+      "label": "実行ログ"
+    },
+    {
+      "id": "edge-11",
+      "from": "iam",
+      "to": "lambda",
+      "type": "dependency",
+      "label": "最小権限"
+    },
+    {
+      "id": "edge-12",
+      "from": "cloudflare",
+      "to": "acm",
+      "type": "optional",
+      "label": "DNS検証CNAME（未設定）"
+    },
+    {
+      "id": "edge-13",
+      "from": "acm",
+      "to": "cloudfront",
+      "type": "optional",
+      "label": "証明書・alias（未有効）"
+    }
+  ],
+  "modules": [
+    {
+      "id": "client",
+      "label": "利用者端末（AWS外）",
+      "color": "#F8FAFC"
+    },
+    {
+      "id": "edge",
+      "label": "AWS グローバル / エッジ",
+      "color": "#FFF7ED"
+    },
+    {
+      "id": "tokyo",
+      "label": "AWS ap-northeast-1（東京）",
+      "color": "#EFF6FF"
+    },
+    {
+      "id": "pending_domain",
+      "label": "独自ドメイン経路（未有効）",
+      "color": "#F3F4F6"
+    }
+  ]
+}
