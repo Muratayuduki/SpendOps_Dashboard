@@ -29,6 +29,7 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 - Terraform stateは48エントリ（管理リソース43件、data 5件）で、再Planは差分0。
 - CloudFront既定ドメインの公開サイト、API、Cognito、DynamoDB、Lambdaは稼働中。
 - 2026-09-03にLambdaと公開画面の`auth.js`、`script.js`、`styles.css`を更新済み（Terraform Applyは0件追加、4件変更、0件削除）。
+- 2026-09-03に比較方法を独立した選択カードとして示す表示改善をローカル実装済み。公開環境には未反映。
 - 独自ドメインはACMのDNS検証待ちで、CloudFront aliasとCloudflare DNSは未変更。
 - 直近の記録済みテスト結果はフロント47件、Lambda 24件、合計71件成功。
 - 認証後の実ユーザー比較成立ケースは公開E2E未確認。

@@ -234,14 +234,21 @@ function renderReport(report, mode = "aws") {
   document.querySelector("#report-month").textContent = formatMonth(report.month);
   document.querySelector("#total-expense").textContent = yen.format(summary.total_expense);
   document.querySelector("#total-expense-label").textContent = isPeriodSummary ? "期間内の支出" : "今月の支出";
-  document.querySelector("#comparison-label").textContent = isPeriodSummary ? "1か月あたり" : comparison.label;
+  const comparisonTarget = isPeriodSummary
+    ? "1か月あたり"
+    : comparison.type === "personal" ? "自分の過去平均" : "みんなの月平均";
+  document.querySelector("#comparison-result-heading").textContent = isPeriodSummary
+    ? "表示内容：期間の月平均"
+    : `比較対象：${comparisonTarget}`;
   document.querySelector("#comparison-value").textContent = isPeriodSummary
     ? yen.format(summary.monthly_average || 0)
     : hasComparison ? yen.format(comparison.value) : "比較待ち";
   document.querySelector("#comparison-note").textContent = isPeriodSummary ? `${summary.period_month_count || 0}か月の平均` : comparison.note;
-  document.querySelector("#comparison-status").textContent = isPeriodSummary
+  const comparisonStatus = document.querySelector("#comparison-status");
+  comparisonStatus.textContent = isPeriodSummary
     ? `${summary.period_month_count || 0}か月をまとめて表示`
     : comparison.type === "group" && !hasComparison ? "みんなとの比較" : comparison.status;
+  comparisonStatus.hidden = !isPeriodSummary && comparison.status?.startsWith("参考例と比較");
   document.querySelector("#transaction-count").textContent = `${number.format(summary.transaction_count)}件`;
   document.querySelector("#source-count").textContent = isPeriodSummary ? "期間内のすべて" : "選んだ月の合計";
   document.querySelector("#period-change-label").textContent = isPeriodSummary ? "対象期間" : "前の月から";
@@ -272,20 +279,19 @@ function renderReport(report, mode = "aws") {
   donutTotal.classList.toggle("is-long", fullYen.length >= 10);
   donutTotal.classList.toggle("is-very-long", fullYen.length >= 14);
   renderInsight(report.insight);
-  document.querySelector("#open-transactions").hidden = !Array.isArray(report.transactions) || !report.transactions.length;
-  document.querySelector("#open-category-review").hidden = !Array.isArray(report.transactions) || !report.transactions.length;
+  const hasTransactions = Array.isArray(report.transactions) && report.transactions.length > 0;
+  document.querySelector("#detail-actions").hidden = !hasTransactions;
+  document.querySelector("#open-transactions").hidden = !hasTransactions;
+  document.querySelector("#open-category-review").hidden = !hasTransactions;
 
   const comparisonText = document.querySelector("#average-comparison");
   comparisonText.textContent = isPeriodSummary
     ? "月ごとの違いは棒グラフで確認できます"
     : hasComparison
-    ? `${comparison.label}より ${formatRate(summary.difference_rate)}`
+    ? `${comparisonTarget}との差：${formatRate(summary.difference_rate)}`
     : comparison.type === "group"
       ? "みんなとの比較"
       : "過去の月がまだ不足";
-  if (hasComparison && comparison.type === "personal") {
-    comparisonText.textContent = `本人の過去平均より ${formatRate(summary.difference_rate)}`;
-  }
 
   const badge = document.querySelector("#dataset-badge");
   badge.hidden = mode === "local";
@@ -2531,6 +2537,8 @@ function setComparisonMode(mode, rerender = true) {
   personalButton.classList.toggle("is-active", mode === "personal");
   groupButton.setAttribute("aria-pressed", String(mode === "group"));
   personalButton.setAttribute("aria-pressed", String(mode === "personal"));
+  groupButton.querySelector(".comparison-card-state span").textContent = mode === "group" ? "選択中" : "選択する";
+  personalButton.querySelector(".comparison-card-state span").textContent = mode === "personal" ? "選択中" : "選択する";
   if (rerender && (localAnalysis || storedAnalysisData?.length)) {
     animateComparisonTransition();
     renderLocalMonth();

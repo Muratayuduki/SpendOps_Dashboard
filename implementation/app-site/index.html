@@ -79,34 +79,40 @@
           <div class="result-heading">
             <div class="report-title-block">
               <span class="kicker">ANALYSIS RESULT</span>
-              <div class="report-title-row">
-                <h2 id="dashboard-title"><span id="report-month">—</span> レポート</h2>
-                <label class="report-period-field" id="report-period-control" for="month-select" hidden>
-                  <span>表示する期間</span>
-                  <select id="month-select" aria-label="レポートの表示期間"></select>
-                </label>
+              <h2 id="dashboard-title"><span id="report-month">—</span> レポート</h2>
+              <div class="heading-status-summary">
+                <span class="dataset-badge" id="dataset-badge">—</span>
+                <span class="comparison-status" id="comparison-status">—</span>
               </div>
             </div>
-            <div class="heading-status">
-              <div class="scope-control" id="scope-control" hidden>
-                <span class="switch-label">見る範囲</span>
-                <div class="scope-switch" id="scope-switch" role="group" aria-label="見る範囲の切替">
-                  <button class="is-active" id="all-scope" type="button" aria-pressed="true">まとめて</button>
-                  <button id="paypay-scope" type="button" aria-pressed="false">PayPayだけ</button>
-                  <button id="card-scope" type="button" aria-pressed="false">カードだけ</button>
-                </div>
+            <label class="report-period-field" id="report-period-control" for="month-select" hidden>
+              <span>表示する期間</span>
+              <select id="month-select" aria-label="レポートの表示期間"></select>
+            </label>
+            <div class="scope-control" id="scope-control" hidden>
+              <span class="switch-label">見る範囲</span>
+              <div class="scope-switch" id="scope-switch" role="group" aria-label="見る範囲の切替">
+                <button class="is-active" id="all-scope" type="button" aria-pressed="true">まとめて</button>
+                <button id="paypay-scope" type="button" aria-pressed="false">PayPayだけ</button>
+                <button id="card-scope" type="button" aria-pressed="false">カードだけ</button>
               </div>
-              <div class="comparison-control" id="comparison-control">
-                <span class="switch-label">比べ方</span>
-                <div class="comparison-switch" role="group" aria-label="比べ方">
-                  <button class="is-active" id="group-mode" type="button" aria-pressed="true"><i aria-hidden="true">◎</i><span>みんなと比べる<small>同じ条件の平均</small></span></button>
-                  <button id="personal-mode" type="button" aria-pressed="false"><i aria-hidden="true">↗</i><span>自分の過去と比べる<small>これまでの月平均</small></span></button>
-                </div>
+            </div>
+            <div class="comparison-control" id="comparison-control">
+              <span class="switch-label">比較法</span>
+              <div class="comparison-switch" role="group" aria-label="比較法">
+                <button class="is-active" id="group-mode" type="button" aria-pressed="true">
+                  <span class="comparison-card-copy"><strong>みんなの月平均</strong><small>他5人以上の完全月</small></span>
+                  <span class="comparison-card-state" aria-hidden="true"><i>✓</i><span>選択中</span></span>
+                </button>
+                <button id="personal-mode" type="button" aria-pressed="false">
+                  <span class="comparison-card-copy"><strong>自分の過去平均</strong><small>最大12か月の平均</small></span>
+                  <span class="comparison-card-state" aria-hidden="true"><i>✓</i><span>選択する</span></span>
+                </button>
               </div>
-              <span class="dataset-badge" id="dataset-badge">—</span>
-              <span class="comparison-status" id="comparison-status">—</span>
-              <button class="detail-button" id="open-transactions" type="button" hidden>明細を見る・使いみちを直す</button>
-              <button class="detail-button category-review-button" id="open-category-review" type="button" hidden>分類をまとめて見直す</button>
+            </div>
+            <div class="detail-actions" id="detail-actions" aria-label="明細の確認と修正" hidden>
+              <button class="detail-button" id="open-transactions" type="button" hidden>支払い明細</button>
+              <button class="detail-button" id="open-category-review" type="button" hidden>分類修正</button>
             </div>
           </div>
 
@@ -114,10 +120,10 @@
             <article class="metric metric-main">
               <span id="total-expense-label">今月の支出</span>
               <strong id="total-expense">—</strong>
-              <small id="average-comparison">—</small>
+              <small class="comparison-difference" id="average-comparison">—</small>
             </article>
-            <article class="metric">
-              <span id="comparison-label">比較基準</span>
+            <article class="metric metric-comparison" id="comparison-result" aria-labelledby="comparison-result-heading">
+              <span class="comparison-result-heading" id="comparison-result-heading">比較対象：みんなの月平均</span>
               <strong id="comparison-value">—</strong>
               <small id="comparison-note">—</small>
             </article>
@@ -150,7 +156,6 @@
             </article>
 
             <article class="insight-panel">
-              <span>✦ NEXT ACTION</span>
               <h3>結果から分かること</h3>
               <div class="insight-content" id="insight-text">—</div>
             </article>
@@ -166,7 +171,7 @@
         <header class="transaction-dialog-header">
           <div>
             <span class="kicker">PAYMENT DETAILS</span>
-            <h2 id="transaction-title">支払い明細・使いみちの編集</h2>
+            <h2 id="transaction-title">支払い明細</h2>
             <p id="transaction-context">—</p>
           </div>
           <div class="transaction-filters">
