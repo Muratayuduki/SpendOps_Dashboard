@@ -1,2 +1,3 @@
-# Calibreが再生成するローカルキャッシュ
-/materials/work/docs/calibre-config/fonts/scanner_cache.json
+# ローカルCSVと作業計画（Git管理対象外）
+/implementation/csv/local/
+/project-guidance/work/

@@ -1,6 +1,6 @@
 # SpendOps Dashboard 現在コンテキスト
 
-更新日: 2026-09-03（Asia/Tokyo）
+更新日: 2026-09-11（Asia/Tokyo）
 
 通常のリポジトリ作業では、このファイルと`project-guidance/active-guardrails.md`だけを最初に読む。詳細仕様、作業履歴、分野別手順は、依頼に必要な箇所だけ参照する。
 
@@ -25,15 +25,17 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 
 ## 現在状態
 
-- AWS基盤は2026-09-02に新しいAWSアカウントへTerraform第1段階を再構築済み。
-- Terraform stateは48エントリ（管理リソース43件、data 5件）で、再Planは差分0。
-- CloudFront既定ドメインの公開サイト、API、Cognito、DynamoDB、Lambdaは稼働中。
+- AWS基盤は2026-09-11に、ユーザー承認済みの保存済みDestroy PlanでTerraform管理の42リソースを削除済み。
+- Terraform stateは0エントリ。削除前と削除保護解除後のローカルstateバックアップを保持している。
+- CloudFront、S3、API Gateway、Lambda、Cognito、DynamoDBは削除済みで、公開サイト、API、認証、クラウド保存は現在利用できない。
 - 2026-09-03にLambdaと公開画面の`auth.js`、`script.js`、`styles.css`を更新済み（Terraform Applyは0件追加、4件変更、0件削除）。
-- 2026-09-03に比較方法を独立した選択カードとして示す表示改善をローカル実装済み。公開環境には未反映。
-- 独自ドメインはACMのDNS検証待ちで、CloudFront aliasとCloudflare DNSは未変更。
+- 2026-09-03に実装した、比較方法を独立した選択カードとして示す表示改善は、2026-09-07の本番構築で公開環境へ反映済み。
+- ACM証明書はDestroy前にAWS上で削除済み。Cloudflare DNSはTerraform管理外で、今回のDestroyでは変更していない。
 - 直近の記録済みテスト結果はフロント47件、Lambda 24件、合計71件成功。
 - 認証後の実ユーザー比較成立ケースは公開E2E未確認。
-- 第2段階の独自ドメイン有効化・Cloudflare変更・追加AWS変更は、新しいPlanを作り、対象Planへの明示的な実行依頼がある場合だけ行う。
+- レビュー指摘1〜3を反映した17区間の音声と焼き込み字幕を割り当て、修正版MP4を生成した。5分00秒の全編デコードと、冒頭・中盤・終盤の字幕表示を確認済み。
+- Google Sites版の録画と指定背景を基準に再構成した紹介サイト、5分動画、企画書PDF、AWS構成図は、リポジトリ外の`C:\development\SpendOps_Dashboard_Material\`へ分離済み。移動前にローカルHTTP 200、動画Range配信206、企画書PDFの`application/pdf`配信を確認済み。外部公開は未実施。
+- AWSを再構築する場合は、現在のstate 0件から新しいPlanを作り、対象Planへの明示的な実行依頼がある場合だけ行う。
 
 ## 主要パス
 
@@ -43,7 +45,7 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 | `implementation/lambda/` | Python Lambdaとunittest |
 | `implementation/terraform/` | AWS Terraform定義と運用資料 |
 | `implementation/csv/` | 実データを含み得るローカルCSV。通常は読まない |
-| `materials/` | 構成図、Notionローカル版、成果物、画像、生成物 |
+| `C:\development\SpendOps_Dashboard_Material\` | リポジトリ外へ分離した現行AWS構成図、最新の完成デモ動画、紹介サイト |
 | `project-guidance/` | 現在コンテキスト、ガードレール、引継ぎ、プロンプト |
 | `.agents/skills/` | 繰り返し作業のスキルと実行スクリプト |
 | `.codex/agents/` | 担当別カスタムエージェント |

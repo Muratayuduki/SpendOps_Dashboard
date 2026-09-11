@@ -1,27 +1,28 @@
 # SpendOps Dashboard 現在の引継ぎ
 
-更新日: 2026-09-02（Asia/Tokyo）
+更新日: 2026-09-11（Asia/Tokyo）
 
 このファイルには現在の停止地点、次に行う作業、未決事項だけを置く。過去の詳細ログは`project-guidance/history/`を日付・語句で検索する。
 
 ## 現在の停止地点
 
-- AWS基盤は2026-09-02に新しいAWSアカウントへTerraform第1段階を再構築済みで、stateは48エントリ。
-- CloudFront既定ドメインの公開サイト、Cognito、API、Lambda、DynamoDBは稼働中。公開APIとサイトは200、認証必須APIの未認証アクセスは401を確認済み。
-- Applyは43追加、0変更、0削除で完了し、`activate_custom_domain = false`の再Planは差分0。
-- ACM証明書はDNS検証待ち。独自ドメイン、CloudFront alias、Cloudflare DNSは未変更。
-- AWS構成図は2026-09-02のTerraform実装と稼働状態へ同期済み。編集用spec、構造JSON、SVG、PNGを同じフォルダーに保持している。
-- ローカルのアプリ、Lambda、Terraform定義、テスト、構成図、展示資料、技術解説は保持している。
+- AWS基盤は2026-09-11にTerraform Destroyを完了し、現在のTerraform stateは0エントリである。ローカルstateバックアップは保持している。
+- Destroy前に、AWS外で削除済みのACMとCognito推定利用者数3→4をrefresh-onlyでstateへ反映した（AWS変更0）。Cognito 1件とDynamoDB 4件の削除保護解除Plan（0 add/5 change/0 destroy）を適用後、Destroy Plan（0 add/0 change/42 destroy、SHA256 `E05E92D13FCB1FB0187F376A73ABACF67B5832AF24FB359FBC1ABE4AFDFD4BD8`）をユーザー承認後に適用した。
+- 2026-09-07の構築時には、公開サイト、health、demo-reportの200、認証必須reportsの未認証アクセス401、DynamoDB、Cognito、Lambda、S3、ACMの状態を確認済み。現在はDestroy済みのため利用できない。
+- 初回ApplyはACM作成後にOAuth認証失効で中断したが、新規Planを監査・承認後、残り42件を適用した。再Planは追加0、変更0、削除0。
+- ユーザー承認により、暗号化ロック付きremote backendは未実装のままlocal stateでApplyした。stateバックアップは取得済み。
+- 比較選択カードのWeb資産は2026-09-07の本番公開環境へ反映済みだった。現在はDestroy済みで、ソースだけをローカルに保持している。
+- Cloudflare DNSはTerraform管理外のため残存している。独自ドメイン、CloudFront alias、AWS基盤の再構築は未実施である。
+- ローカルのアプリ、Lambda、Terraform定義、テストはリポジトリ内に保持している。構成図、最新完成動画、紹介サイトは`C:\development\SpendOps_Dashboard_Material\`へ分離済み。旧説明資料と制作中間物は2026-09-09に整理済みで、説明資料は現行仕様から新規作成する。
 - 直近の記録済み自動テストはフロント47件、Lambda 24件、合計71件成功。
 - 2026-08-01にリポジトリを`implementation/`、`materials/`、`project-guidance/`へ整理し、スキルとカスタムエージェントを追加した。
 - 2026-08-01に常時読込を`current-context.md`と`active-guardrails.md`へ縮小し、長い履歴とガードレール設計資料を履歴・アーカイブへ分離した。
 
 ## 次の優先作業
 
-1. デザインの配色、余白、ボタン、情報密度、可読性を仕上げる。
-2. 自動分類と表記ゆれ対応を改善し、実例で分類精度を確認する。
-3. Notionローカル版、企画・要件資料を現在状態へ同期する。
-4. Google Slides / Google Docsの共有範囲を提出方法に合わせて確認する。
+1. AWS基盤を再構築する場合は、最新stateを確認し、新規Planを作成・監査してから明示承認を得る。
+2. 提出時に、AWS基盤がDestroy済みであることを前提に、提出物とローカル成果物の確認範囲を確定する。
+3. デザイン、自動分類・表記ゆれ対応、提出資料の仕上げを進める。
 
 銀行CSV対応とAWS Cost Explorerは対象外。主機能の追加より提出物の仕上げを優先する。
 
@@ -37,8 +38,7 @@
 ## 外部・期限依存
 
 - 旧AWSアカウントの未匿名DynamoDBシステムバックアップ8件は2026-08-19と2026-08-27に自動失効予定だったが、2026-09-02時点では旧アカウントへアクセスできず、失効状態は要再確認。復元・コピーは行わない。
-- 再構築時は`activate_custom_domain = false`から始め、ACM発行後に独自ドメインを有効化する二段階手順を使う。
-- Cloudflare DNSはTerraform管理外。
+- Cloudflare DNSはTerraform管理外で残存している。AWS基盤再構築後に独自ドメインを扱う場合は、別途新規Planと明示承認が必要である。
 
 ## 詳細履歴の探し方
 

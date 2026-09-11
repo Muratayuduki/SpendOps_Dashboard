@@ -5,9 +5,9 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 対象はPayPayとクレジットカードです。現行実装はPayPay、JCB、三井住友VISAに対応し、銀行CSVは対象外です。AWS基盤はTerraformで構築・管理します。
 
 > [!IMPORTANT]
-> 2026-09-02に新しいAWSアカウントへTerraform第1段階を再構築しました。CloudFront既定ドメインの公開サイトとAPIは稼働中です。独自ドメインはACMのDNS検証待ちで、まだ有効化していません。
+> 2026-09-11にユーザー承認済みの保存済みDestroy Planを適用し、Terraform管理のAWS基盤42リソースを削除しました。現在のTerraform stateは0件で、公開サイト、API、認証、クラウド保存は停止しています。
 
-最終精査日: 2026-09-03
+最終精査日: 2026-09-11
 
 ## 現在の状態
 
@@ -16,11 +16,12 @@ SpendOps Dashboardは、PayPayとクレジットカードの利用明細CSVを�
 | 対象データ | PayPay、クレジットカード（JCB・三井住友VISA） |
 | 対象外 | 横浜銀行を含む銀行CSV、AWS料金分析 |
 | 主機能 | CSV解析、支出レポート、比較、明細復元、分類学習まで実装済み |
-| 公開サイト | CloudFront既定ドメインで稼働中。HTTPS 200を確認済み |
-| API・認証・DB | API Gateway、Lambda、Cognito、DynamoDBを再構築済み |
-| Terraform state | 48エントリ（管理リソース43件、data 5件）。2026-09-02に再Plan差分0を確認済み |
-| 独自ドメイン | ACMはDNS検証待ち。CloudFront aliasとCloudflare DNSは未変更 |
+| 公開サイト | 2026-09-11のDestroyでCloudFrontとS3を削除済み。現在は利用不可 |
+| API・認証・DB | API Gateway、Lambda、Cognito、DynamoDBを削除済み |
+| Terraform state | 0エントリ。承認済みPlanで42リソースを削除済み |
+| 独自ドメイン | ACM証明書はDestroy前にAWS上で削除済み。Cloudflare DNSはTerraform管理外 |
 | 自動テスト | フロントエンド47件、Lambda 24件、合計71件成功 |
+| 新デモ動画 | レビュー指摘1〜3を反映した17区間の音声と焼き込み字幕を割り当てた修正版MP4を生成済み。5分00秒の全編デコード、字幕表示、分類説明と締めの開始時刻、登録中の無音短縮を確認済み |
 | 直近の目標 | 2026-09-07の学校課題提出に向けて仕上げる |
 
   SpendOps_Dashboardで○○を修正して　リポジトリ内のAGENTS.mdに従い、対象箇所だけを確認してください。一括検証とサブエージェントは、必要な場合だけ使用して
@@ -172,17 +173,18 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 
 ## 現在のAWS・バックアップ状態
 
-2026-07-23にユーザー承認後のTerraform Destroyで42リソースを削除し、2026-09-02に新しいAWSアカウントへ第1段階の基盤を再構築しました。
+2026-07-23に旧環境を削除し、2026-09-07に本番環境（`prod`）を再構築しました。2026-09-11に削除保護を解除した後、SHA-256 `E05E92D13FCB1FB0187F376A73ABACF67B5832AF24FB359FBC1ABE4AFDFD4BD8`の保存済みDestroy Planをユーザー承認後に適用し、Terraform管理の42リソースを削除しました。
 
 | 項目 | 状態 |
 |---|---|
 | AWSリージョン | `ap-northeast-1` |
-| Terraform state | 48エントリ（管理リソース43件、data 5件） |
-| 構築確認記録 | 43追加、0変更、0削除。Apply後の再Planは差分0 |
-| 削除対象データ | 個別取引3,477件、月別集計60件、取込履歴17件、分類ルール0件、Cognitoユーザー3件 |
+| Terraform state | 0エントリ |
+| 最新の削除記録 | 0件追加、0件変更、42件削除。ローカルstateバックアップを保持 |
+| 直前の構築記録 | 2026-09-07に管理リソース43件を追加。Apply後の再Planは差分0 |
+| 旧環境の削除時記録 | 個別取引3,477件、月別集計60件、取込履歴17件、分類ルール0件、Cognitoユーザー3件 |
 | 長期バックアップ | `spendops-anonymized-comparison-20260723` |
 | 長期バックアップ内容 | 匿名化済み月別集計60件、匿名参加者3人分 |
-| Cloudflare DNS | Terraform管理外。新しいACM検証用CNAMEと公開用CNAMEは未設定 |
+| Cloudflare DNS | Terraform管理外。今回のDestroyでは変更・削除していない |
 
 長期バックアップには、個別取引、利用先、取込履歴、分類ルール、Cognito情報、元ユーザーID、匿名IDとの対応表を含めていません。詳細は[`implementation/docs/operations/anonymized_comparison_backup.md`](implementation/docs/operations/anonymized_comparison_backup.md)を参照してください。
 
@@ -199,7 +201,7 @@ CSV原本の解析はブラウザ内で完結します。AWSへ送るのは、�
 | `implementation/terraform/` | Cognito、DynamoDB、Lambda、API Gateway、S3、CloudFront、ACM等の定義 |
 | `implementation/csv/` | ローカル検証用CSV。金融情報として慎重に扱い、内容をログや資料へ転記しない |
 | `implementation/portfolio-site/` | 別途作成したポートフォリオ用静的サイト |
-| `materials/` | 構成図、Notionローカル版、成果物、画像、生成ツール、中間生成物 |
+| `C:\development\SpendOps_Dashboard_Material\` | リポジトリ外へ分離した現行AWS構成図、最新の完成デモ動画、紹介サイト |
 | `project-guidance/` | 短い現在コンテキストとアクティブガードレール、現在引継ぎ、履歴、資料作成用プロンプト |
 | `.agents/` / `.codex/` | リポジトリスキル、カスタムエージェント、Codexプロジェクト設定 |
 
@@ -257,7 +259,7 @@ terraform validate
 terraform state list
 ```
 
-2026-09-02の結果: フォーマット確認成功、構成検証成功、stateは48エントリ、`activate_custom_domain = false`の再Planは差分0。
+2026-09-07の結果: フォーマット確認成功、構成検証成功、stateは48エントリ、`activate_custom_domain = false`の再Planは差分0。
 
 ## AWS再構築
 
@@ -276,7 +278,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 
 ## 既知の制限と残作業
 
-- 独自ドメインはACMのDNS検証待ちで、CloudFront既定ドメインを使用している
+- AWS基盤は2026-09-11にDestroy済みで、公開サイト、API、認証、クラウド保存は現在利用できない
 - 銀行CSVは対象外
 - PayPay、JCB、VISAの返金・取消表現は実例による追加検証が必要
 - PayPayチャージとカード明細のような異なるソース間の二重計上は自動解消しない
@@ -288,7 +290,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 比較用合成データは実統計ではなく、元データが少ないため参考値としての精度に限界がある
 - 収入、資産推移、予算管理は未実装
 - デザイン、情報密度、分類精度、テストデータの仕上げが残っている
-- Notionローカル版とビジュアルブリーフの一部にAWS削除前の記述があり、READMEとの同期が必要
+- AWSを再構築する場合は、新しいPlanと公開範囲を確認し、明示承認後に適用する必要がある
 
 ## 完了条件
 
@@ -329,15 +331,11 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 | [`implementation/docs/operations/anonymized_comparison_backup.md`](implementation/docs/operations/anonymized_comparison_backup.md) | 匿名比較バックアップの保持・復元方針 | 長期バックアップの正本 |
 | [`implementation/terraform/README.md`](implementation/terraform/README.md) | AWS構成、API、Terraform操作 | Apply前の承認が必要 |
 | [`implementation/docs/operations/custom_domain_cloudflare_setup.md`](implementation/docs/operations/custom_domain_cloudflare_setup.md) | 独自サブドメイン再接続手順 | 新しいoutputを正とする |
-| [`materials/architecture/spendops_aws_architecture.drawio`](materials/architecture/spendops_aws_architecture.drawio) | AWS構成図 | 2026-09-02の再構築後状態へ同期済み |
-| [`materials/notion/spendops_dashboard_notion_plan_with_gantt.md`](materials/notion/spendops_dashboard_notion_plan_with_gantt.md) | 7月完成計画 | 一部のAWS削除記録が旧状態 |
-| [`materials/source/app_visual_brief.md`](materials/source/app_visual_brief.md) | ロゴ・画像・発表資料用ブリーフ | 公開継続の記述が削除前状態 |
-| [`materials/deliverables/SpendOps_Dashboard_展示資料.pptx`](materials/deliverables/SpendOps_Dashboard_展示資料.pptx) | 12枚・約20分の自由閲覧向け展示資料 | Google Slidesへ取込済み。5枚目の実画面はGoogle Slides版に反映 |
-| [`materials/deliverables/SpendOps_Dashboard_技術解説.docx`](materials/deliverables/SpendOps_Dashboard_技術解説.docx) | セキュリティ、個人情報保護、技術選定、制約の別紙 | Google Docsへ取込済み。Google Slides最終ページからリンク済み |
-| [SpendOps Dashboard 10分展示発表（Google Slides）](https://docs.google.com/presentation/d/1WSOxf4kgJBEZs7VNk1aPSyvjvut5bp7IJF7TwJCiCp8/edit?usp=drivesdk) | 8枚・9分10秒の説明と2分40秒デモ向け発表資料 | 4枚目の画面画像から合成デモ動画を開ける |
-| [`materials/deliverables/SpendOps_Dashboard_デモ動画_2分40秒.webm`](materials/deliverables/SpendOps_Dashboard_デモ動画_2分40秒.webm) | 1600×900、無音・字幕付きの合成デモ動画 | 実CSV、公開URL、ブラウザプロフィールを含まない |
-| [`materials/deliverables/SpendOps_Dashboard_10分発表_台本とデモ手順.md`](materials/deliverables/SpendOps_Dashboard_10分発表_台本とデモ手順.md) | 10分の進行、話す内容、動画のカット割り | 本編9分10秒、操作待ちなどの余白50秒 |
-| [`materials/deliverables/SpendOps_Dashboard_デザインレビュー.md`](materials/deliverables/SpendOps_Dashboard_デザインレビュー.md) | 実画面とコードに基づくデザインレビュー | 合成デモの比較切替などを改善候補として記録 |
+| `C:\development\SpendOps_Dashboard_Material\architecture\spendops_aws_architecture.drawio` | AWS公式リファレンス図に合わせ、矩形の境界グループ、64px角の公式アイコン、左から右への通信方向を統一したAWS構成図 | PNG・SVG・設計sidecarと一緒に保持 |
+| `C:\development\SpendOps_Dashboard_Material\deliverables\SpendOps_Dashboard_5分デモ動画_音声・字幕付き_修正版.mp4` | 1920×1128、5分00秒、17区間の日本語ナレーションと焼き込み字幕付き動画 | リポジトリ外の資料フォルダーで保持。全編デコードと冒頭・中盤・終盤の字幕表示を確認済み |
+| `C:\development\SpendOps_Dashboard_Material\introduction-site\` | Google Sites版の録画と指定背景を基準に、5分動画、企画書PDF、AWS構成図、開発理由から製作上の工夫までを掲載する1ページサイト | ローカルHTTP 200、動画Range配信206、企画書PDFの`application/pdf`配信を確認済み。ローカル版は更新済みで、外部公開は未実施 |
+
+旧説明資料、旧動画、制作中間物は2026-09-09のプロジェクト整理で削除しました。説明資料は現行仕様から新規作成します。
 
 詳細な日別作業ログはREADMEへ重複させず、`project-guidance/history/YYYY-MM.md`で管理します。現在の停止地点と次回作業だけを`project-guidance/current-handoff.md`へ反映します。
 
@@ -350,6 +348,7 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 - 2026-07-23: 展示会形式の約20分自由閲覧を想定した12枚の本編PPTXと、技術解説DOCXを作成。PowerPoint実描画、Open XML構造、70件の自動テストを再確認
 - 2026-09-02: 新しいAWSアカウントへTerraform第1段階を再構築。43リソースを追加し、CloudFront既定ドメイン、API、Cognito、DynamoDB、Lambdaを検証。独自ドメインはACM検証待ち
 - 2026-09-03: 実ユーザー比較を支払い種別で分けず、本人を除く同月の完全月集計を利用者単位で合算する変更をデプロイ。Terraform Applyは0件追加、4件変更、0件削除で、Lambdaと公開画面の`auth.js`、`script.js`、`styles.css`を更新。DynamoDB、Cognito、IAM、APIルート、CloudFront設定、独自ドメインは変更していない。公開サイト、公開API、認証必須APIの未認証拒否を確認し、認証後の実比較成立ケースは公開E2E未確認
+- 2026-09-07: 本番環境（`prod`）の第1段階をstate 0件から構築。管理リソース43件、data 5件をstateで確認し、公開サイトと公開APIは200、認証必須APIの未認証アクセスは401、再Planは差分0を確認。独自ドメインはACMのDNS検証待ち
 
 ## 既存の利用者フィードバック
 
@@ -368,7 +367,9 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 
 ## 残り作業
 
-### googleスライド、紹介サイトを使い　開発物の概要の紹介
+### googleスライドを使い　開発物の概要の紹介
+
+紹介サイトは`C:\development\SpendOps_Dashboard_Material\introduction-site\`へ分離済み。Googleスライドは未作成です。
 
 - その開発物を開発しようと思った理由
 - 課題と解決法
@@ -380,9 +381,9 @@ Cloudflareの認証情報やAPIトークンはTerraform、Git、資料へ保存�
 
 - ~~アイコンの追加~~
 
-#### 比較方法の切替表示（ローカル実装済み）
+#### 比較方法の切替表示（公開環境へ反映済み）
 
-比較ロジックは変えず、比較方法と現在の比較対象を判別しやすくする表示改善を2026-09-03にローカル実装した。公開環境には未反映。
+比較ロジックは変えず、比較方法と現在の比較対象を判別しやすくする表示改善を2026-09-03に実装し、2026-09-07の本番構築で公開環境へ反映した。
 
 - 2つの選択肢を、それぞれ独立した枠を持つ横並びの選択カードとして表示する
 - 表示文言は「みんなの月平均／他5人以上の完全月」と「自分の過去平均／最大12か月の平均」とする
