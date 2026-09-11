@@ -244,11 +244,7 @@ function renderReport(report, mode = "aws") {
     ? yen.format(summary.monthly_average || 0)
     : hasComparison ? yen.format(comparison.value) : "比較待ち";
   document.querySelector("#comparison-note").textContent = isPeriodSummary ? `${summary.period_month_count || 0}か月の平均` : comparison.note;
-  const comparisonStatus = document.querySelector("#comparison-status");
-  comparisonStatus.textContent = isPeriodSummary
-    ? `${summary.period_month_count || 0}か月をまとめて表示`
-    : comparison.type === "group" && !hasComparison ? "みんなとの比較" : comparison.status;
-  comparisonStatus.hidden = !isPeriodSummary && comparison.status?.startsWith("参考例と比較");
+  document.querySelector("#comparison-status").hidden = true;
   document.querySelector("#transaction-count").textContent = `${number.format(summary.transaction_count)}件`;
   document.querySelector("#source-count").textContent = isPeriodSummary ? "期間内のすべて" : "選んだ月の合計";
   document.querySelector("#period-change-label").textContent = isPeriodSummary ? "対象期間" : "前の月から";
@@ -279,10 +275,8 @@ function renderReport(report, mode = "aws") {
   donutTotal.classList.toggle("is-long", fullYen.length >= 10);
   donutTotal.classList.toggle("is-very-long", fullYen.length >= 14);
   renderInsight(report.insight);
-  const hasTransactions = Array.isArray(report.transactions) && report.transactions.length > 0;
-  document.querySelector("#detail-actions").hidden = !hasTransactions;
-  document.querySelector("#open-transactions").hidden = !hasTransactions;
-  document.querySelector("#open-category-review").hidden = !hasTransactions;
+  document.querySelector("#open-transactions").hidden = !Array.isArray(report.transactions) || !report.transactions.length;
+  document.querySelector("#open-category-review").hidden = !Array.isArray(report.transactions) || !report.transactions.length;
 
   const comparisonText = document.querySelector("#average-comparison");
   comparisonText.textContent = isPeriodSummary
@@ -294,8 +288,8 @@ function renderReport(report, mode = "aws") {
       : "過去の月がまだ不足";
 
   const badge = document.querySelector("#dataset-badge");
-  badge.hidden = mode === "local";
-  badge.textContent = mode === "stored" ? "保存済み" : mode === "local" ? "" : "お試し表示";
+  badge.hidden = true;
+  badge.textContent = "";
 
   renderBreakdown(report);
   renderTrend(report.trend || [], isPeriodSummary ? null : report.month);
@@ -1821,7 +1815,7 @@ function getGroupBaseline(source, month) {
     type: "group",
     label: `${sourceLabel}の参考平均`,
     value: eligible ? Number(value) : null,
-    note: eligible ? "参考データ（実際の利用者平均ではありません）" : "比べるための記録を準備中",
+    note: eligible ? "" : "比べるための記録を準備中",
     status: eligible ? `参考例と比較・${participantCount}人分` : "みんなとの比較",
     categoryAverages: eligible ? monthData?.category_averages || sourceData?.category_averages || {} : {},
   };
@@ -2537,8 +2531,6 @@ function setComparisonMode(mode, rerender = true) {
   personalButton.classList.toggle("is-active", mode === "personal");
   groupButton.setAttribute("aria-pressed", String(mode === "group"));
   personalButton.setAttribute("aria-pressed", String(mode === "personal"));
-  groupButton.querySelector(".comparison-card-state span").textContent = mode === "group" ? "選択中" : "選択する";
-  personalButton.querySelector(".comparison-card-state span").textContent = mode === "personal" ? "選択中" : "選択する";
   if (rerender && (localAnalysis || storedAnalysisData?.length)) {
     animateComparisonTransition();
     renderLocalMonth();

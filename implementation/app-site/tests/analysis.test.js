@@ -295,7 +295,7 @@ test("group comparison is default and personal comparison remains selectable", (
   assert.equal(groupReport.comparison.value, 7500);
   assert.equal(groupReport.comparison.label, "全支払い方法の参考平均");
   assert.equal(groupReport.comparison.status, "参考例と比較・120人分");
-  assert.equal(groupReport.comparison.note, "参考データ（実際の利用者平均ではありません）");
+  assert.equal(groupReport.comparison.note, "");
   assert.equal(personalReport.comparison.type, "personal");
   assert.equal(personalReport.comparison.value, 1000);
 });
@@ -320,7 +320,7 @@ test("all payment scopes use the same combined comparison cohort", () => {
   assert.equal(allReport.sources.reduce((sum, source) => sum + source.amount, 0), 9000);
   assert.equal(allReport.comparison.value, 7500);
   assert.equal(allReport.comparison.status, "参考例と比較・120人分");
-  assert.equal(allReport.comparison.note, "参考データ（実際の利用者平均ではありません）");
+  assert.equal(allReport.comparison.note, "");
   assert.equal(payPayReport.summary.total_expense, 2000);
   assert.equal(payPayReport.comparison.value, 7500);
   assert.equal(payPayReport.comparison.label, "全支払い方法の参考平均");
