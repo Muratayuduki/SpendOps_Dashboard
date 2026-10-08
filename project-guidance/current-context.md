@@ -1,6 +1,6 @@
 # SpendOps Dashboard 現在コンテキスト
 
-更新日: 2026-09-11（Asia/Tokyo）
+更新日: 2026-10-08（Asia/Tokyo、紹介ページ・試用実績を同期）
 
 通常のリポジトリ作業では、このファイルと`project-guidance/active-guardrails.md`だけを最初に読む。詳細仕様、作業履歴、分野別手順は、依頼に必要な箇所だけ参照する。
 
@@ -23,6 +23,9 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 - 実ユーザー比較は支払い種別を条件にせず、本人を除く同月の`partial=false`の月別集計を利用者単位で合算し、他5人以上の場合に表示する。
 - ソース別の最終取込日と未取込警告は未実装。
 
+- 個人開発。学校の知人向けに約1週間公開し、20人分の実データで動作確認した（開発者申告）。
+- 公開しているデータはダミーデータ。試用時の個人情報への不安の声には未対応。
+
 ## 現在状態
 
 - AWS基盤は2026-09-11に、ユーザー承認済みの保存済みDestroy PlanでTerraform管理の42リソースを削除済み。
@@ -34,7 +37,7 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 - 直近の記録済みテスト結果はフロント47件、Lambda 24件、合計71件成功。
 - 認証後の実ユーザー比較成立ケースは公開E2E未確認。
 - レビュー指摘1〜3を反映した17区間の音声と焼き込み字幕を割り当て、修正版MP4を生成した。5分00秒の全編デコードと、冒頭・中盤・終盤の字幕表示を確認済み。
-- Google Sites版の録画と指定背景を基準に再構成した紹介サイト、5分動画、企画書PDF、AWS構成図は、リポジトリ外の`C:\development\SpendOps_Dashboard_Material\`へ分離済み。移動前にローカルHTTP 200、動画Range配信206、企画書PDFの`application/pdf`配信を確認済み。外部公開は未実施。
+- 紹介サイトと資料の制作ファイルは、リポジトリ外の`C:\development\SpendOps_Dashboard_Material\`へ分離済み。紹介ページ https://yuduki0303.com/spendops/ でデモ動画などを公開中（開発者申告）。アプリ本体は停止中。
 - AWSを再構築する場合は、現在のstate 0件から新しいPlanを作り、対象Planへの明示的な実行依頼がある場合だけ行う。
 
 ## 主要パス
@@ -44,7 +47,7 @@ README全体は、仕様変更、横断監査、資料同期など正本の詳�
 | `implementation/app-site/` | HTML、CSS、JavaScript、フロントテスト |
 | `implementation/lambda/` | Python Lambdaとunittest |
 | `implementation/terraform/` | AWS Terraform定義と運用資料 |
-| `implementation/csv/` | 実データを含み得るローカルCSV。通常は読まない |
+| `implementation/csv/` | 公開用ダミーCSVと生成スクリプト。個人のローカルCSVとは区別する |
 | `C:\development\SpendOps_Dashboard_Material\` | リポジトリ外へ分離した現行AWS構成図、最新の完成デモ動画、紹介サイト |
 | `project-guidance/` | 現在コンテキスト、ガードレール、引継ぎ、プロンプト |
 | `.agents/skills/` | 繰り返し作業のスキルと実行スクリプト |
