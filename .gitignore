@@ -1,3 +1,6 @@
 # ローカルCSVと作業計画（Git管理対象外）
 /implementation/csv/local/
 /project-guidance/work/
+/.codex/
+/AGENTS.md
+/.agents/
